@@ -75,7 +75,7 @@ class Policy(nn.Module):
 
     def forward(self, s):
         loc = torch.tanh(self.model(s))
-        scale = torch.exp(self.log_std)
+        scale = torch.clip(torch.exp(self.log_std), 0.1, 1)
         normal_dist = Normal(loc, scale)
         return normal_dist, loc
 

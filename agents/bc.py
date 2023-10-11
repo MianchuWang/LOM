@@ -12,7 +12,7 @@ class BC(BaseAgent):
 
     def train_models(self, batch_size=512):
         states, actions, _, _, _ = self.replay_buffer.sample(batch_size)
-        states_prep, actions_prep, _, _ = self.preprocess(states=states, actions=actions)
+        states_prep, actions_prep, _, _, _ = self.preprocess(states=states, actions=actions)
         
         ac_dist, ac_mean = self.policy(states_prep)
         log_prob = ac_dist.log_prob(actions_prep)
@@ -26,7 +26,7 @@ class BC(BaseAgent):
 
     def get_action(self, state):
         with torch.no_grad():
-            state_prep, _, _ = \
+            state_prep, _, _, _, _ = \
                 self.preprocess(states=state[np.newaxis])
             ac_dist, action = self.policy(state_prep)
         return action.cpu().numpy().squeeze()
