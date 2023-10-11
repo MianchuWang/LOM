@@ -60,7 +60,7 @@ class TD3BC(BaseAgent):
         policy_loss.backward()
         self.policy_opt.step()
         
-        return {'policy_loss': policy_loss.item()}
+        return {'policy/loss': policy_loss.item()}
     
     def train_value_function(self, batch_size):
         states, actions, rewards, next_states, terminals  = self.replay_buffer.sample(batch_size)
@@ -85,6 +85,6 @@ class TD3BC(BaseAgent):
             q_loss.backward()
             self.q_net_opts[k].step()
         
-        return {'q_loss': q_loss.item(), 
-                'pred_value': pred_q_value.mean().item(), 
-                'target_value': target_q_value.mean().item()}
+        return {'Q/loss': q_loss.item(), 
+                'Q/pred_value': pred_q_value.mean().item(), 
+                'Q/target_value': target_q_value.mean().item()}

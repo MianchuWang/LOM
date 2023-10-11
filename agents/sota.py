@@ -4,7 +4,7 @@ import numpy as np
 from agents.td3bc import TD3BC 
 from networks.networks import Policy, Qnetwork
 
-class STR(TD3BC):
+class SOTA(TD3BC):
     def __init__(self, **agent_params):
         super().__init__(**agent_params)
         self.behaviour_policy = Policy(self.state_dim, self.ac_dim).to(device=self.device)
@@ -38,14 +38,7 @@ class STR(TD3BC):
             advs = q_values - curr_q_values
             weights_exp = torch.clip(torch.exp(2 * advs), -10000, 100).squeeze()
             
-            # The importance sampling weight
-            bc_dist, _ = self.behaviour_policy(states_prep)
-            prob_bc = 10 ** bc_dist.log_prob(actions_prep)
-            prob_cu = 10 ** gen_dist.log_prob(actions_prep)
-            weights_is = (prob_bc / prob_cu).mean(dim=-1)
-            weights_is = weights_is / weights_is.sum()
-            
-            weights = weights_exp * weights_is
+            weights = weights_exp
         
         policy_loss = ((gen_actions - actions_prep).pow(2).mean(dim=1) * weights).mean()
         

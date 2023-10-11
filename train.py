@@ -16,7 +16,7 @@ import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env_name', type=str, default='hopper-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='str')
+parser.add_argument('--agent', type=str, default='str-snis')
 parser.add_argument('--buffer_capacity', type=int, default=1000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
@@ -24,7 +24,7 @@ parser.add_argument('--seed', type=int, default=-1)
 
 parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
 parser.add_argument('--project', type=str, default='mujoco_locomotion')
-parser.add_argument('--group', type=str, default='test_sh')
+parser.add_argument('--group', type=str, default='test')
 parser.add_argument('--training_steps', type=int, default=1_000_000)  
 parser.add_argument('--eval_episodes', type=int, default=50) 
 parser.add_argument('--eval_every', type=int, default=5000)
@@ -51,11 +51,13 @@ np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 torch.cuda.manual_seed(args.seed)
 
-buffer = ReplayBuffer(buffer_size=args.buffer_capacity, state_dim=env_info['state_dim'], ac_dim=env_info['ac_dim'])
+buffer = ReplayBuffer(buffer_size=args.buffer_capacity, 
+                      state_dim=env_info['state_dim'], 
+                      ac_dim=env_info['ac_dim'])
 buffer.load_dataset(d4rl.qlearning_dataset(env))
-    
-agent = return_agent(agent=args.agent, replay_buffer=buffer, state_dim=env_info['state_dim'],
-                     ac_dim=env_info['ac_dim'], device=device, discount=args.discount, normalise=args.normalise)
+agent = return_agent(agent=args.agent, replay_buffer=buffer, 
+                     state_dim=env_info['state_dim'], ac_dim=env_info['ac_dim'], 
+                     device=device, discount=args.discount, normalise=args.normalise)
 
 
 def eval_policy(env, agent, render=False):

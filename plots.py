@@ -16,6 +16,12 @@ def retrieve_csv_files(directory):
     else:
         print(f"Directory not found: {directory}")
     return csv_files
+
+def moving_average(data, window_size):
+    # Create a simple moving average for the data
+    weights = np.ones(window_size) / window_size
+    smoothed_data = np.convolve(data, weights, mode='valid')
+    return smoothed_data
         
 def plot_results(file_paths):
     plt.figure()
@@ -53,14 +59,19 @@ def plot_results(file_paths):
         # Calculate mean and std dev
         y_mean = np.mean(interpolated_scores, axis=0)
         y_std = np.std(interpolated_scores, axis=0)
-
-        plt.plot(common_steps, y_mean, label=algo)
+        
+        # Smooth the data with a moving average (adjust window size as needed)
+        window_size = 20
+        smoothed_y_mean = moving_average(y_mean, window_size=window_size)
+        
+        plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, linewidth=1)
         plt.fill_between(common_steps, y_mean - y_std, y_mean + y_std, alpha=0.2)
     
     title = file_path.split('/')[3].split('_')[1]
     plt.xlabel('Total Steps')
     plt.ylabel('Normalized Score')
-    plt.legend(loc='upper left')
+    plt.grid(linestyle=':')
+    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
     plt.title(title)
     plt.show()
 
