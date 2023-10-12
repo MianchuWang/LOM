@@ -106,6 +106,23 @@ class Qnetwork(nn.Module):
         output = self.model(input)
         return output
 
+class Binary_Classifier(nn.Module):
+    def __init__(self, state_dim, ac_dim):
+        super(Binary_Classifier, self).__init__()
+        self.state_dim = state_dim
+        self.ac_dim = ac_dim
+        self.model = nn.Sequential(nn.Linear(state_dim+ac_dim, 256),
+                                   nn.ReLU(),
+                                   nn.Linear(256, 256),
+                                   nn.ReLU(),
+                                   nn.Linear(256, 1))
+    
+    def forward(self, state, action):
+        input = torch.cat([state, action], dim=1)
+        output = torch.sigmoid(self.model(input))
+        return output
+
+
 class Contrastive(nn.Module):
     def __init__(self, state_dim, ac_dim, goal_dim):
         super(Contrastive, self).__init__()

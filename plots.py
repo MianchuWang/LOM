@@ -5,16 +5,19 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 
 
-def retrieve_csv_files(directory):
+def retrieve_csv_files(directory, env_name):
     csv_files = []
     if os.path.exists(directory):
         for current_path, directories, files in os.walk(directory):
             for file in files:
                 if file.endswith('.csv'):
                     full_path = os.path.join(current_path, file)
-                    csv_files.append(full_path)
+                    if full_path.split('/')[3].split('_')[1] == env_name:
+                        csv_files.append(full_path)
     else:
-        print(f"Directory not found: {directory}")
+        raise Exception(f"Directory not found: {directory}")
+    if len(csv_files) == 0:
+        raise Exception(f"Experiments on {env_name} not found")
     return csv_files
 
 def moving_average(data, window_size):
@@ -77,7 +80,8 @@ def plot_results(file_paths):
 
 
 def plot_main_experiments():
-    csv_files = retrieve_csv_files('experiments/')
+    csv_files = retrieve_csv_files(directory='experiments/', 
+                                   env_name='halfcheetah-medium-replay-v2')
     plot_results(file_paths=csv_files)
 
 if __name__=='__main__':
