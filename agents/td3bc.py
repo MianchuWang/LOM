@@ -24,6 +24,8 @@ class TD3BC(BaseAgent):
         self.policy_training_steps = 0
         self.training_steps = 0
         self.alpha = 2.5
+        self.policy_info = {}
+        self.value_info = {}
     
     def get_action(self, state):
         with torch.no_grad():
@@ -32,14 +34,13 @@ class TD3BC(BaseAgent):
         return action.cpu().numpy().squeeze()
     
     def train_models(self):
-        policy_info = {}
-        value_info = self.train_value_function(batch_size=256)
+        self.value_info = self.train_value_function(batch_size=256)
         if self.training_steps % self.policy_delay == 0:
-            policy_info = self.train_policy(batch_size=256)
+            self.policy_info = self.train_policy(batch_size=256)
             self.update_target_nets(self.q_nets, self.q_target_nets)
             self.update_target_nets([self.policy], [self.target_policy])
         self.training_steps += 1
-        return {**value_info, **policy_info}
+        return {**self.value_info, **self.policy_info}
     
     def update_target_nets(self, net, target_net):
         for k in range(len(net)):

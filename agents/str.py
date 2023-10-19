@@ -13,7 +13,7 @@ class STR(TD3BC):
         self.policy.load_state_dict(self.behaviour_policy.state_dict())
             
     def train_behaviour_policy(self, batch_size, steps):
-        print('Learning a Gaussian behaviour policy ... ')
+        if steps > 0: print('Learning a Gaussian behaviour policy ... ')
         for _ in range(steps):
             states, actions, _, _, _ = self.replay_buffer.sample(batch_size=batch_size)
             states_prep, actions_prep, _, _, _ = self.preprocess(states=states, actions=actions)
@@ -23,8 +23,7 @@ class STR(TD3BC):
             self.behaviour_policy_opt.zero_grad()
             behaviour_policy_loss.backward()
             self.behaviour_policy_opt.step()
-        
-        
+
     def train_policy(self, batch_size):
         states, actions, rewards, next_states, terminals  = self.replay_buffer.sample(batch_size)
         states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = \

@@ -16,7 +16,7 @@ import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='CPI-joint')
+parser.add_argument('--agent', type=str, default='CPI-con-pos')
 parser.add_argument('--buffer_capacity', type=int, default=1000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)

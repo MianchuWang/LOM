@@ -36,7 +36,6 @@ def plot_results(file_paths):
 
     # Dictionary to store all data points for each algorithm
     algo_data = defaultdict(list)
-
     # Read data
     for file_path in file_paths:
         data = pd.read_csv(file_path)
@@ -77,18 +76,23 @@ def plot_results(file_paths):
             continue
         elif algo == 'TD3BC': 
             color=algo_colors[1]
-        elif algo == 'STR': 
+            continue
+        elif algo == 'AWR': 
             color=algo_colors[2]
         elif algo == 'STR-noIS': 
-            color=algo_colors[2]
-        elif algo.startswith('CPI'):
-            continue
-        elif algo == 'BPI-joint':
             color=algo_colors[3]
-        elif algo == 'BPI-seq':
+        elif algo == 'CPI-joint':
             color=algo_colors[4]
+        elif algo == 'CPI-seq':
+            continue
+        elif algo == 'CPI-con-exp':
+            color=algo_colors[5]
+        elif algo == 'CPI-con-pos':
+            color=algo_colors[6]
+        elif algo.startswith('BPI'):
+            continue
         else: 
-            color = algo_colors[5+i]
+            color = algo_colors[8+i]
         
         plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, color=color, linewidth=1)
         plt.fill_between(common_steps, y_mean - y_std, y_mean + y_std, alpha=0.2)
@@ -97,7 +101,10 @@ def plot_results(file_paths):
     plt.xlabel('Total Steps')
     plt.ylabel('Normalized Score')
     plt.grid(linestyle=':')
-    plt.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    
+    handles, labels = plt.gca().get_legend_handles_labels()
+    sorted_labels, sorted_handles = zip(*sorted(zip(labels, handles)))
+    plt.legend(sorted_handles, sorted_labels, loc='upper left', bbox_to_anchor=(1, 1))
     plt.title(title)
     plt.show()
 
