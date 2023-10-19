@@ -28,6 +28,11 @@ def moving_average(data, window_size):
         
 def plot_results(file_paths):
     plt.figure()
+    
+    algo_colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', 
+                   '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#ff5733', '#4caf50',
+                   '#ff3f80', '#5bc0de', '#ffd700', '#9932CC', '#00CED1', '#FF1493',
+                   '#32CD32', '#8A2BE2']
 
     # Dictionary to store all data points for each algorithm
     algo_data = defaultdict(list)
@@ -43,7 +48,7 @@ def plot_results(file_paths):
             print(f"Required columns not found in the file: {file_path}")
 
     # For each algorithm, interpolate to common steps, then calculate mean and std dev, and plot
-    for algo, data_list in algo_data.items():
+    for i, (algo, data_list) in enumerate(algo_data.items()):
         # Find the maximum 'total steps' across all dataframes for the current algorithm
         max_steps = max(df['total steps'].max() for df in data_list)
 
@@ -67,7 +72,25 @@ def plot_results(file_paths):
         window_size = 20
         smoothed_y_mean = moving_average(y_mean, window_size=window_size)
         
-        plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, linewidth=1)
+        if algo == 'BC': 
+            color=algo_colors[0]
+            continue
+        elif algo == 'TD3BC': 
+            color=algo_colors[1]
+        elif algo == 'STR': 
+            color=algo_colors[2]
+        elif algo == 'STR-noIS': 
+            color=algo_colors[2]
+        elif algo.startswith('CPI'):
+            continue
+        elif algo == 'BPI-joint':
+            color=algo_colors[3]
+        elif algo == 'BPI-seq':
+            color=algo_colors[4]
+        else: 
+            color = algo_colors[5+i]
+        
+        plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, color=color, linewidth=1)
         plt.fill_between(common_steps, y_mean - y_std, y_mean + y_std, alpha=0.2)
     
     title = file_path.split('/')[3].split('_')[1]
@@ -80,9 +103,11 @@ def plot_results(file_paths):
 
 
 def plot_main_experiments():
-    csv_files = retrieve_csv_files(directory='experiments/', 
-                                   env_name='halfcheetah-medium-replay-v2')
-    plot_results(file_paths=csv_files)
+    envs = ['halfcheetah-medium-replay-v2', 'hopper-medium-replay-v2']
+    for env in envs:
+        csv_files = retrieve_csv_files(directory='experiments/', 
+                                       env_name=env)
+        plot_results(file_paths=csv_files)
 
 if __name__=='__main__':
     plot_main_experiments()

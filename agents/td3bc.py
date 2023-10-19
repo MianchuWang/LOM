@@ -5,14 +5,14 @@ from agents.base_agent import BaseAgent
 from networks.networks import Policy, Qnetwork
 
 class TD3BC(BaseAgent):
-    def __init__(self, **agent_params):
+    def __init__(self, K=2, **agent_params):
         super().__init__(**agent_params)
         self.policy = Policy(self.state_dim, self.ac_dim).to(device=self.device)
         self.target_policy = Policy(self.state_dim, self.ac_dim).to(device=self.device)
         self.target_policy.load_state_dict(self.policy.state_dict())
         self.policy_opt = torch.optim.Adam(self.policy.parameters(), lr=3e-4)
         
-        self.K = 2
+        self.K = K
         self.q_nets, self.q_target_nets, self.q_net_opts = [], [], []
         for k in range(self.K):
             self.q_nets.append(Qnetwork(self.state_dim, self.ac_dim).to(device=self.device))

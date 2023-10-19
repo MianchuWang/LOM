@@ -21,11 +21,11 @@ class BaseAgent(object):
     def reset(self):
         return
 
-    def get_action(self, state, goal):
+    def get_action(self, state):
         raise NotImplementedError()
 
-    def plan(self, state, goal):
-        raise self.get_action(state, goal)
+    def plan(self, state):
+        raise NotImplementedError()
 
     def train_models(self):
         raise NotImplementedError()

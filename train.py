@@ -16,7 +16,7 @@ import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='sota-10logbc')
+parser.add_argument('--agent', type=str, default='CPI-joint')
 parser.add_argument('--buffer_capacity', type=int, default=1000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
@@ -24,7 +24,7 @@ parser.add_argument('--seed', type=int, default=-1)
 
 parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
 parser.add_argument('--project', type=str, default='mujoco_locomotion')
-parser.add_argument('--group', type=str, default='test')
+parser.add_argument('--group', type=str, default='')
 parser.add_argument('--training_steps', type=int, default=1_000_000)  
 parser.add_argument('--eval_episodes', type=int, default=20) 
 parser.add_argument('--eval_every', type=int, default=5000)
@@ -32,6 +32,7 @@ parser.add_argument('--log_path', type=str, default='./experiments/')
 args = parser.parse_args()
 
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
+args.group = args.agent.split('-')[0]
 
 if args.enable_wandb:
     wandb.init(project=args.project, config=args, group=args.group, name='{}_{}_seed{}'.format(args.agent, args.env_name, args.seed))
@@ -53,7 +54,7 @@ torch.cuda.manual_seed(args.seed)
 
 buffer = ReplayBuffer(buffer_size=args.buffer_capacity, 
                       state_dim=env_info['state_dim'], 
-                      ac_dim=env_info['ac_dim'])
+                      ac_dim=env_info['ac_dim'], discount=args.discount)
 buffer.load_dataset(d4rl.qlearning_dataset(env))
 agent = return_agent(agent=args.agent, replay_buffer=buffer, 
                      state_dim=env_info['state_dim'], ac_dim=env_info['ac_dim'], 

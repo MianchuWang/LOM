@@ -75,22 +75,21 @@ class Policy(nn.Module):
 
     def forward(self, s):
         loc = torch.tanh(self.model(s))
-        scale = torch.clip(torch.exp(self.log_std), 0.1, 1)
+        scale = torch.exp(self.log_std)
         normal_dist = Normal(loc, scale)
         return normal_dist, loc
 
 class Vnetwork(nn.Module):
-    def __init__(self, state_dim, goal_dim):
+    def __init__(self, state_dim):
         super(Vnetwork, self).__init__()
         self.state_dim = state_dim
-        self.model = nn.Sequential(nn.Linear(state_dim + goal_dim, 256),
+        self.model = nn.Sequential(nn.Linear(state_dim, 256),
                                    nn.ReLU(),
                                    nn.Linear(256, 256),
                                    nn.ReLU(),
                                    nn.Linear(256, 1))
-    def forward(self, state, goal):
-        input = torch.cat([state, goal], dim=1)
-        output = self.model(input)
+    def forward(self, state):
+        output = self.model(state)
         return output
 
 class Qnetwork(nn.Module):
@@ -121,39 +120,3 @@ class Binary_Classifier(nn.Module):
         input = torch.cat([state, action], dim=1)
         output = torch.sigmoid(self.model(input))
         return output
-
-
-class Contrastive(nn.Module):
-    def __init__(self, state_dim, ac_dim, goal_dim):
-        super(Contrastive, self).__init__()
-        self.state_dim = state_dim
-        self.ac_dim = ac_dim
-        self.goal_dim = goal_dim
-        
-        self.s_encoder = nn.Sequential(nn.Linear(state_dim+ac_dim, 1024),
-                                       nn.ReLU(),
-                                       nn.Linear(1024, 1024),
-                                       nn.ReLU(),
-                                       nn.Linear(1024, 16))
-        self.g_encoder = nn.Sequential(nn.Linear(goal_dim, 1024),
-                                       nn.ReLU(),
-                                       nn.Linear(1024, 1024),
-                                       nn.ReLU(),
-                                       nn.Linear(1024, 16))
-    
-    def forward(self, states, actions, goals):
-        phi = self.encode_anchor(states, actions)
-        psi = self.encode_target(goals)
-        pred = torch.matmul(phi, psi.transpose(1, 0))
-        return torch.diag(pred)
-    
-    def encode_anchor(self, states, actions):
-        if actions == None:
-            return self.s_encoder(states)
-        else:
-            input = torch.cat([states, actions], dim=1)
-        return self.s_encoder(input)
-    
-    def encode_target(self, goal):
-        return self.g_encoder(goal)
-        
