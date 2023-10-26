@@ -60,7 +60,7 @@ class AWR(BaseAgent):
         with torch.no_grad():
             values = self.v_nets[0](states_prep)
             advantage = returns - values
-            exp_adv = torch.clip(torch.exp(self.beta * advantage), -10000, 20)
+            exp_adv = torch.clip(torch.exp(self.beta * advantage), None, 20)
             weights = exp_adv.squeeze(dim=1)
             
         policy_loss = ((gen_actions - actions_prep.detach()).pow(2).mean(dim=1) * weights).mean()

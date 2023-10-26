@@ -91,6 +91,8 @@ def plot_results(file_paths):
             color=algo_colors[6]
         elif algo.startswith('BPI'):
             continue
+        elif algo == 'TEST':
+            color=algo_colors[7]
         else: 
             color = algo_colors[8+i]
         

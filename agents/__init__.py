@@ -19,5 +19,8 @@ def return_agent(**agent_params):
     elif agent_params['agent'].startswith('CPI'):
         from agents.cpi import CPI
         return CPI(**agent_params)
+    elif agent_params['agent'].startswith('TEST'):
+        from agents.test import TEST
+        return TEST(**agent_params)
     else:
         raise Exception('Invalid agent!')
