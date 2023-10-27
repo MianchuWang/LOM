@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from agents import BaseAgent
+from agents.base_agent import BaseAgent
 from networks.networks import Policy, Vnetwork
 
 class AWR(BaseAgent):

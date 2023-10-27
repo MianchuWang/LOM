@@ -76,28 +76,19 @@ def plot_results(file_paths):
             continue
         elif algo == 'TD3BC': 
             color=algo_colors[1]
-            continue
         elif algo == 'AWR': 
             color=algo_colors[2]
-        elif algo == 'STR-noIS': 
+        elif algo == 'STR': 
             color=algo_colors[3]
-        elif algo == 'CPI-joint':
+        elif algo == 'EXPLO':
             color=algo_colors[4]
-        elif algo == 'CPI-seq':
-            continue
-        elif algo == 'CPI-con-exp':
+        elif algo == 'EXPLO-4critics':
             color=algo_colors[5]
-        elif algo == 'CPI-con-pos':
-            color=algo_colors[6]
-        elif algo.startswith('BPI'):
-            continue
-        elif algo == 'TEST':
-            color=algo_colors[7]
         else: 
-            color = algo_colors[8+i]
+            color = algo_colors[5+i]
         
         plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, color=color, linewidth=1)
-        plt.fill_between(common_steps, y_mean - y_std, y_mean + y_std, alpha=0.2)
+        #plt.fill_between(common_steps[:-window_size+1], smoothed_y_mean - y_std[:-window_size+1], smoothed_y_mean + y_std[:-window_size+1], color=color, alpha=0.2)
     
     title = file_path.split('/')[3].split('_')[1]
     plt.xlabel('Total Steps')
@@ -112,7 +103,8 @@ def plot_results(file_paths):
 
 
 def plot_main_experiments():
-    envs = ['halfcheetah-medium-replay-v2', 'hopper-medium-replay-v2']
+    envs = ['halfcheetah-medium-replay-v2', 'hopper-medium-replay-v2',
+            'walker2d-medium-replay-v2']
     for env in envs:
         csv_files = retrieve_csv_files(directory='experiments/', 
                                        env_name=env)

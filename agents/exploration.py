@@ -5,8 +5,8 @@ from torch.distributions.normal import Normal
 from agents.td3bc import TD3BC 
 from networks.networks import Policy, Qnetwork
 
-class TEST(TD3BC):
-    def __init__(self, K=4, bc_initialization=50000, **agent_params):
+class EXPLORATION(TD3BC):
+    def __init__(self, K=2, bc_initialization=50000, **agent_params):
         super().__init__(K=K, **agent_params)
         self.behaviour_policy = Policy(self.state_dim, self.ac_dim).to(device=self.device)
         self.behaviour_policy_opt = torch.optim.Adam(self.behaviour_policy.parameters(), lr=3e-4)
