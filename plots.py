@@ -73,7 +73,6 @@ def plot_results(file_paths):
         
         if algo == 'BC': 
             color=algo_colors[0]
-            continue
         elif algo == 'TD3BC': 
             color=algo_colors[1]
         elif algo == 'AWR': 
@@ -82,13 +81,11 @@ def plot_results(file_paths):
             color=algo_colors[3]
         elif algo == 'EXPLO':
             color=algo_colors[4]
-        elif algo == 'EXPLO-4critics':
-            color=algo_colors[5]
         else: 
             color = algo_colors[5+i]
         
         plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, color=color, linewidth=1)
-        #plt.fill_between(common_steps[:-window_size+1], smoothed_y_mean - y_std[:-window_size+1], smoothed_y_mean + y_std[:-window_size+1], color=color, alpha=0.2)
+        plt.fill_between(common_steps[:-window_size+1], smoothed_y_mean - y_std[:-window_size+1], smoothed_y_mean + y_std[:-window_size+1], color=color, alpha=0.2)
     
     title = file_path.split('/')[3].split('_')[1]
     plt.xlabel('Total Steps')
