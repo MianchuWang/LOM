@@ -5,6 +5,31 @@ from torch.distributions.normal import Normal
 from agents.td3bc import TD3BC 
 from networks.networks import Policy, Qnetwork
 
+class Advque:
+    def __init__(self, size=50000):
+        self.size = size 
+        self.current_size = 0
+        self.que = np.zeros(size)
+        self.idx = 0
+    
+    def update(self, values):
+        l = len(values)
+
+        if self.idx + l <= self.size:
+            idxes = np.arange(self.idx, self.idx+l)
+        else:
+            idx1 = np.arange(self.idx, self.size)
+            idx2 = np.arange(0, self.idx+l -self.size)
+            idxes = np.concatenate((idx1, idx2))
+        self.que[idxes] = values.reshape(-1)
+
+        self.idx = (self.idx + l) % self.size 
+        self.current_size = min(self.current_size+l, self.size)
+
+    def get(self, threshold):
+        return np.percentile(self.que[:self.current_size], threshold)
+
+
 class EXPLORATION(TD3BC):
     def __init__(self, K=4, bc_initialization=50000, **agent_params):
         super().__init__(K=K, **agent_params)
@@ -12,6 +37,10 @@ class EXPLORATION(TD3BC):
         self.behaviour_policy_opt = torch.optim.Adam(self.behaviour_policy.parameters(), lr=3e-4)
         self.train_behaviour_policy(batch_size=256, steps=bc_initialization)
         self.policy.load_state_dict(self.behaviour_policy.state_dict())
+        
+        self.adv_que = Advque()
+        self.quantile_threshold = 0.0
+        self.maximum_thre = 80
             
     def train_behaviour_policy(self, batch_size, steps):
         if steps > 0: print('Learning a Gaussian behaviour policy ... ')
@@ -57,13 +86,25 @@ class EXPLORATION(TD3BC):
             
             advs_2 = values_2 - curr_values_2
             weights_exp_2 = torch.clip(torch.exp(2 * advs_2), None, 100).squeeze()
-        policy_loss_2 = ((gen_actions - sampled_actions).pow(2).mean(dim=1) * weights_exp_2).mean()
+            '''
+            positives = (weights_exp_2 > 1).to(dtype=torch.float)
+            weights_exp_2 = weights_exp_2 * positives
+            '''
+            self.adv_que.update(advs_2.cpu().numpy())
+            temp_threshold = self.adv_que.get(self.quantile_threshold)
+            positives = torch.ones_like(advs_2)
+            positives[advs_2 < temp_threshold] = 0
+            weights_exp_2 = weights_exp_2 * positives
+            
+        policy_loss_2 = ((gen_actions - sampled_actions).pow(2).mean(dim=1) * weights_exp_2).sum() / positives.sum()
         
-        policy_loss = policy_loss_1 + policy_loss_2
+        policy_loss = policy_loss_1 + 2 * policy_loss_2
         
         self.policy_opt.zero_grad()
         policy_loss.backward()
         self.policy_opt.step()
+        
+        self.quantile_threshold = min(self.quantile_threshold + 0.0004, self.maximum_thre)
         
         return {'policy/loss': policy_loss.item(),
                 'policy/weights1': weights_exp_1.mean().item(),

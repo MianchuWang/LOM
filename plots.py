@@ -73,12 +73,16 @@ def plot_results(file_paths):
         
         if algo == 'BC': 
             color=algo_colors[0]
+            continue
         elif algo == 'TD3BC': 
             color=algo_colors[1]
+            #continue
         elif algo == 'AWR': 
             color=algo_colors[2]
+            #continue
         elif algo == 'STR': 
             color=algo_colors[3]
+            #continue
         elif algo == 'EXPLO':
             color=algo_colors[4]
         else: 
