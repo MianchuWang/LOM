@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from torch.distributions.normal import Normal
+from torch.distributions.kl import kl_divergence
 
 from agents.td3bc import TD3BC 
 from networks.networks import Policy, Qnetwork
@@ -41,6 +42,7 @@ class EXPLORATION(TD3BC):
         self.adv_que = Advque()
         self.quantile_threshold = 0.0
         self.maximum_thre = 80
+        self.lamb = agent_params['explo_lamb']
             
     def train_behaviour_policy(self, batch_size, steps):
         if steps > 0: print('Learning a Gaussian behaviour policy ... ')
@@ -77,6 +79,7 @@ class EXPLORATION(TD3BC):
             values_2 = torch.zeros(self.K, batch_size, 1).to(device=self.device)
             for k in range(self.K):
                 values_2[k] = self.q_nets[k](states_prep, sampled_actions)
+            value_uncertainty = values_2.std(dim=0)
             values_2 = torch.min(values_2, dim=0)[0]
             
             curr_values_2 = torch.zeros(self.K, batch_size, 1).to(device=self.device)
@@ -86,26 +89,30 @@ class EXPLORATION(TD3BC):
             
             advs_2 = values_2 - curr_values_2
             weights_exp_2 = torch.clip(torch.exp(2 * advs_2), None, 100).squeeze()
-            '''
-            positives = (weights_exp_2 > 1).to(dtype=torch.float)
-            weights_exp_2 = weights_exp_2 * positives
-            '''
+            
+            # Best-advantage weighting
             self.adv_que.update(advs_2.cpu().numpy())
             temp_threshold = self.adv_que.get(self.quantile_threshold)
             positives = torch.ones_like(advs_2)
-            positives[advs_2 < temp_threshold] = 0
+            #positives[advs_2 < temp_threshold] = 0
             weights_exp_2 = weights_exp_2 * positives
+            self.quantile_threshold = min(self.quantile_threshold + 0.0004, 
+                                          self.maximum_thre)
             
         policy_loss_2 = ((gen_actions - sampled_actions).pow(2).mean(dim=1) * weights_exp_2).sum() / positives.sum()
         
-        policy_loss = policy_loss_1 + 2 * policy_loss_2
+        policy_loss = (1 - self.lamb) * policy_loss_1 + self.lamb * policy_loss_2
         
         self.policy_opt.zero_grad()
         policy_loss.backward()
         self.policy_opt.step()
         
-        self.quantile_threshold = min(self.quantile_threshold + 0.0004, self.maximum_thre)
+        # compute KL-divergence
+        bc_dist, _ = self.behaviour_policy(states_prep)
+        kl_div = kl_divergence(gen_dist, bc_dist)
         
         return {'policy/loss': policy_loss.item(),
                 'policy/weights1': weights_exp_1.mean().item(),
-                'policy/weights2': weights_exp_2.mean().item()}
+                'policy/weights2': weights_exp_2.mean().item(),
+                'policy/kl_divergence': kl_div.mean().item(),
+                'policy/value_uncertainty': value_uncertainty.mean().item()}

@@ -76,10 +76,10 @@ def plot_results(file_paths):
             continue
         elif algo == 'TD3BC': 
             color=algo_colors[1]
-            #continue
+            continue
         elif algo == 'AWR': 
             color=algo_colors[2]
-            #continue
+            continue
         elif algo == 'STR': 
             color=algo_colors[3]
             #continue
@@ -104,11 +104,13 @@ def plot_results(file_paths):
 
 
 def plot_main_experiments():
-    envs = ['halfcheetah-medium-replay-v2', 'hopper-medium-replay-v2',
+    envs = ['halfcheetah-medium-replay-v2',# 'hopper-medium-replay-v2',
             'walker2d-medium-replay-v2']
     for env in envs:
-        csv_files = retrieve_csv_files(directory='experiments/', 
-                                       env_name=env)
+        try:
+            csv_files = retrieve_csv_files(directory='experiments/', env_name=env)
+        except Exception:
+            continue
         plot_results(file_paths=csv_files)
 
 if __name__=='__main__':

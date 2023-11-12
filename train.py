@@ -15,24 +15,29 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='walker2d-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='EXPLO-baw')
+parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
+parser.add_argument('--agent', type=str, default='EXPLO-lamb0')
 parser.add_argument('--buffer_capacity', type=int, default=1000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
 parser.add_argument('--project', type=str, default='mujoco_locomotion')
-parser.add_argument('--group', type=str, default='EXPLOR-filter')
+parser.add_argument('--group', type=str, default='lambda')
 parser.add_argument('--training_steps', type=int, default=1_000_000)  
-parser.add_argument('--eval_episodes', type=int, default=20) 
+parser.add_argument('--eval_episodes', type=int, default=25) 
 parser.add_argument('--eval_every', type=int, default=5000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
-args = parser.parse_args()
 
+# EXPLORATION
+parser.add_argument('--lamb', type=float, default=0)
+args = parser.parse_args()
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
-#args.group = args.agent.split('-')[0]
+args.group = args.env_name + '-' + args.group + '-' + str(args.lamb)
+
+# EXPLORATION Parameters
+explo_params = {'explo_lamb': args.lamb}
 
 if args.enable_wandb:
     wandb.init(project=args.project, config=args, group=args.group, name='{}_{}_seed{}'.format(args.agent, args.env_name, args.seed))
@@ -58,7 +63,8 @@ buffer = ReplayBuffer(buffer_size=args.buffer_capacity,
 buffer.load_dataset(d4rl.qlearning_dataset(env))
 agent = return_agent(agent=args.agent, replay_buffer=buffer, 
                      state_dim=env_info['state_dim'], ac_dim=env_info['ac_dim'], 
-                     device=device, discount=args.discount, normalise=args.normalise)
+                     device=device, discount=args.discount, normalise=args.normalise,
+                     **explo_params)
 
 
 def eval_policy(env, agent, render=False):
@@ -75,8 +81,8 @@ def eval_policy(env, agent, render=False):
                 
     avg_reward /= args.eval_episodes
     normalized_score = 100 * env.get_normalized_score(avg_reward)
-    return {'return': avg_reward,
-            'normalized score': normalized_score}
+    return {'eval/return': avg_reward,
+            'eval/normalized score': normalized_score}
 
 
 epoch = 0
@@ -85,9 +91,6 @@ for steps in tqdm(range(0, args.training_steps), mininterval=1):
     
     policy_eval_info = {}
     training_info = agent.train_models()
-    
-    if args.enable_wandb:
-        wandb.log(training_info)
     
     if (steps + 1) % args.eval_every == 0:
         policy_eval_info = eval_policy(env, agent)
@@ -103,3 +106,6 @@ for steps in tqdm(range(0, args.training_steps), mininterval=1):
             else:
                 logger.record_tabular(key, val)
         logger.dump_tabular()
+    
+    if args.enable_wandb:
+        wandb.log({**training_info, **policy_eval_info})
