@@ -16,28 +16,26 @@ import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='EXPLO-lamb0')
-parser.add_argument('--buffer_capacity', type=int, default=1000000)
+parser.add_argument('--agent', type=str, default='EXPLO')
+parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 
 parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
 parser.add_argument('--project', type=str, default='mujoco_locomotion')
-parser.add_argument('--group', type=str, default='lambda')
-parser.add_argument('--training_steps', type=int, default=1_000_000)  
+parser.add_argument('--group', type=str, default='EXPLO-baselines')
+parser.add_argument('--training_steps', type=int, default=2000000)  
 parser.add_argument('--eval_episodes', type=int, default=25) 
-parser.add_argument('--eval_every', type=int, default=5000)
+parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
 
-# EXPLORATION
-parser.add_argument('--lamb', type=float, default=0)
 args = parser.parse_args()
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
-args.group = args.env_name + '-' + args.group + '-' + str(args.lamb)
+args.group = args.env_name + '-' + args.group
 
 # EXPLORATION Parameters
-explo_params = {'explo_lamb': args.lamb}
+explo_params = {}
 
 if args.enable_wandb:
     wandb.init(project=args.project, config=args, group=args.group, name='{}_{}_seed{}'.format(args.agent, args.env_name, args.seed))

@@ -42,7 +42,6 @@ class EXPLORATION(TD3BC):
         self.adv_que = Advque()
         self.quantile_threshold = 0.0
         self.maximum_thre = 80
-        self.lamb = agent_params['explo_lamb']
             
     def train_behaviour_policy(self, batch_size, steps):
         if steps > 0: print('Learning a Gaussian behaviour policy ... ')
@@ -61,17 +60,7 @@ class EXPLORATION(TD3BC):
         states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = \
             self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states, terminals=terminals)
         
-        # Exploitation
         gen_dist, gen_actions = self.policy(states_prep)
-        #gen_dist = Normal(loc=gen_actions, scale=0.1)
-        with torch.no_grad():
-            values_1 = self.q_nets[0](states_prep, actions_prep)
-            curr_values_1 = self.q_nets[0](states_prep, gen_actions)
-            advs_1 = values_1 - curr_values_1
-            weights_exp_1 = torch.clip(torch.exp(2 * advs_1), None, 100).squeeze()
-        policy_loss_1 = ((gen_actions - actions_prep).pow(2).mean(dim=1) * weights_exp_1).mean()
-        
-        # Exploration
         with torch.no_grad():
             sampled_actions = gen_dist.sample()
             sampled_actions = torch.clip(sampled_actions, -1, 1)
@@ -99,9 +88,7 @@ class EXPLORATION(TD3BC):
             self.quantile_threshold = min(self.quantile_threshold + 0.0004, 
                                           self.maximum_thre)
             
-        policy_loss_2 = ((gen_actions - sampled_actions).pow(2).mean(dim=1) * weights_exp_2).sum() / positives.sum()
-        
-        policy_loss = (1 - self.lamb) * policy_loss_1 + self.lamb * policy_loss_2
+        policy_loss = ((gen_actions - sampled_actions).pow(2).mean(dim=1) * weights_exp_2).sum() / positives.sum()
         
         self.policy_opt.zero_grad()
         policy_loss.backward()
@@ -112,7 +99,6 @@ class EXPLORATION(TD3BC):
         kl_div = kl_divergence(gen_dist, bc_dist)
         
         return {'policy/loss': policy_loss.item(),
-                'policy/weights1': weights_exp_1.mean().item(),
                 'policy/weights2': weights_exp_2.mean().item(),
                 'policy/kl_divergence': kl_div.mean().item(),
                 'policy/value_uncertainty': value_uncertainty.mean().item()}
