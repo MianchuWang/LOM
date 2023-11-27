@@ -21,7 +21,7 @@ class ReplayBuffer:
         self.curr_ptr = 0
         self.discount = discount
       
-    def load_dataset(self, dataset):
+    def load_dataset(self, dataset, compute_return=True):
         dataset_size = dataset['observations'].shape[0]
         if dataset_size > self.buffer_size:
             raise Exception('The dataset (size ' + str(dataset_size) + ') is ' + \
@@ -34,14 +34,15 @@ class ReplayBuffer:
         self.curr_ptr = dataset_size
         if dataset_size == self.buffer_size:
             self.is_full = True
-
-        ret = 0
-        for i in reversed(range(self.curr_ptr)):
-            if self.terminals[i]:
-                ret = self.rewards[i]
-            else:
-                ret = self.rewards[i] + ret * self.discount
-            self.returns[i] = ret
+        
+        if compute_return:
+            ret = 0
+            for i in reversed(range(self.curr_ptr)):
+                if self.terminals[i]:
+                    ret = self.rewards[i]
+                else:
+                    ret = self.rewards[i] + ret * self.discount
+                self.returns[i] = ret
    
     def get_bounds(self):
         boarder = self.buffer_size if self.is_full else self.curr_ptr
@@ -66,10 +67,6 @@ class ReplayBuffer:
         ret_rewards = self.rewards[index]
         ret_terminals = self.terminals[index]
         ret_returns = self.returns[index]
-        
-        # states, actions, rewards, next_states, terminals, returns  = self.replay_buffer.sample_with_returns(batch_size)
-        # states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states, terminals=terminals)
-        # returns = torch.tensor(returns, dtype=torch.float32, device=self.device)
-        
+
         return ret_obs, ret_actions, ret_rewards, ret_next_obs, ret_terminals, ret_returns
     
