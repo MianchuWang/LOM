@@ -58,6 +58,17 @@ class ReplayBuffer:
         ret_terminals = self.terminals[index]
         return ret_obs, ret_actions, ret_rewards, ret_next_obs, ret_terminals
     
+    def sample_with_next_action(self, batch_size):
+        boarder = self.get_bounds()
+        index = np.random.randint(0, boarder, batch_size)
+        ret_obs = self.obs[index]
+        ret_next_obs = self.next_obs[index]
+        ret_actions = self.actions[index]
+        ret_next_actions = self.actions[index+1]
+        ret_rewards = self.rewards[index]
+        ret_terminals = self.terminals[index]
+        return ret_obs, ret_actions, ret_rewards, ret_next_obs, ret_next_actions, ret_terminals
+    
     def sample_with_returns(self, batch_size):
         boarder = self.get_bounds()
         index = np.random.randint(0, boarder, batch_size)
