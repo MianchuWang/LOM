@@ -26,7 +26,6 @@ class BC(BaseAgent):
 
     def get_action(self, state):
         with torch.no_grad():
-            state_prep, _, _, _, _ = \
-                self.preprocess(states=state[np.newaxis])
+            state_prep, _, _, _, _ = self.preprocess(states=state[np.newaxis])
             ac_dist, action = self.policy(state_prep)
         return action.cpu().numpy().squeeze()

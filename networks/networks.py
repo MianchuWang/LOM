@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.parametrizations import spectral_norm
 from torch.distributions.normal import Normal
+from torch.distributions import MultivariateNormal
 
 class Generator(nn.Module):
     def __init__(self, state_dim, ac_dim, goal_dim, noise_dim):
@@ -78,6 +79,44 @@ class Policy(nn.Module):
         scale = torch.exp(self.log_std)
         normal_dist = Normal(loc, scale)
         return normal_dist, loc
+
+
+class MixedGaussianPolicy(nn.Module):
+    def __init__(self, state_dim, ac_dim, num_components):
+        super(MixedGaussianPolicy, self).__init__()
+        self.state_dim = state_dim
+        self.ac_dim = ac_dim
+        self.num_components = num_components
+
+        # Common layers for means, standard deviations, and mixing coefficients
+        self.common_layers = nn.Sequential(
+            nn.Linear(state_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU()
+        )
+
+        # Output layers for means, standard deviations, and mixing coefficients
+        self.means_layer = nn.Linear(256, ac_dim * num_components)
+        self.log_std_layer = nn.Linear(256, ac_dim * num_components)
+        self.mixing_coeffs_layer = nn.Linear(256, num_components)
+
+    def forward(self, state):
+        common_out = self.common_layers(state)
+
+        # Reshape for means and standard deviations
+        means = self.means_layer(common_out).view(-1, self.num_components, self.ac_dim)
+        log_std = self.log_std_layer(common_out).view(-1, self.num_components, self.ac_dim)
+        std = torch.exp(log_std)
+
+        # Create a batch of Multivariate Normal Distributions
+        cov_matrix = torch.diag_embed(std**2)  # Assuming independence among action dimensions
+        normal_dists = MultivariateNormal(means, covariance_matrix=cov_matrix)
+
+        mixing_coeffs = torch.nn.functional.softmax(self.mixing_coeffs_layer(common_out), dim=-1)
+
+        return normal_dists, mixing_coeffs
+
 
 class Vnetwork(nn.Module):
     def __init__(self, state_dim):
