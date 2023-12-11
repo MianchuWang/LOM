@@ -15,24 +15,24 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='EXPLO')
+parser.add_argument('--env_name', type=str, default='walker2d-medium-replay-v2')
+parser.add_argument('--agent', type=str, default='CVAE')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
-parser.add_argument('--project', type=str, default='mujoco_locomotion')
-parser.add_argument('--group', type=str, default='EXPLO-baselines')
-parser.add_argument('--training_steps', type=int, default=2000000)  
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
+parser.add_argument('--project', type=str, default='offline-t')
+parser.add_argument('--group', type=str, default='')
+parser.add_argument('--training_steps', type=int, default=100000)  
 parser.add_argument('--eval_episodes', type=int, default=25) 
 parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
 
 args = parser.parse_args()
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
-args.group = args.env_name + '-' + args.group
+args.group = args.env_name + '-' + args.group + args.agent
 
 # EXPLORATION Parameters
 explo_params = {}
@@ -80,7 +80,7 @@ def eval_policy(env, agent, render=False):
     avg_reward /= args.eval_episodes
     normalized_score = 100 * env.get_normalized_score(avg_reward)
     return {'eval/return': avg_reward,
-            'eval/normalized score': normalized_score}
+            'eval/normalized_score': normalized_score}
 
 
 epoch = 0

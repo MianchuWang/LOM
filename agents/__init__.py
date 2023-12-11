@@ -22,8 +22,8 @@ def return_agent(**agent_params):
     elif agent_params['agent'].startswith('EXPLO'):
         from agents.exploration import EXPLORATION
         return EXPLORATION(**agent_params)
-    elif agent_params['agent'].startswith('mixedGaussian'):
-        from agents.mixedGaussian import MixedGaussianBC
-        return MixedGaussianBC(**agent_params)
+    elif agent_params['agent'].startswith('CVAE'):
+        from agents.cvae import CVAE
+        return CVAE(**agent_params)
     else:
         raise Exception('Invalid agent!')

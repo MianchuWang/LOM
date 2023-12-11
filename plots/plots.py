@@ -41,7 +41,7 @@ def plot_results(file_paths):
         data = pd.read_csv(file_path)
         algo = file_path.split('/')[3].split('_')[0]  # Extract algo name from file path
 
-        if 'total steps' in data.columns and 'eval/normalized_score' in data.columns:
+        if 'total steps' in data.columns and 'normalized score' in data.columns:
             algo_data[algo].append(data)
         else:
             print(f"Required columns not found in the file: {file_path}")
@@ -57,7 +57,7 @@ def plot_results(file_paths):
         # Interpolate 'normalized score' for the common 'total steps'
         interpolated_scores = []
         for data in data_list:
-            interpolated = np.interp(common_steps, data['total steps'], data['eval/normalized_score'])
+            interpolated = np.interp(common_steps, data['total steps'], data['normalized score'])
             interpolated_scores.append(interpolated)
 
         # Convert list of np.arrays to 2D np.array
@@ -73,8 +73,20 @@ def plot_results(file_paths):
         
         if algo == 'BC': 
             color=algo_colors[0]
-        elif algo == 'CVAE': 
+            continue
+        elif algo == 'TD3BC': 
             color=algo_colors[1]
+            continue
+        elif algo == 'AWR': 
+            color=algo_colors[2]
+            continue
+        elif algo == 'STR': 
+            color=algo_colors[3]
+            #continue
+        elif algo == 'EXPLO':
+            color=algo_colors[4]
+        else: 
+            color = algo_colors[5+i]
         
         plt.plot(common_steps[:-window_size+1], smoothed_y_mean, label=algo, color=color, linewidth=1)
         plt.fill_between(common_steps[:-window_size+1], smoothed_y_mean - y_std[:-window_size+1], smoothed_y_mean + y_std[:-window_size+1], color=color, alpha=0.2)
@@ -92,26 +104,13 @@ def plot_results(file_paths):
 
 
 def plot_main_experiments():
-    envs = ['halfcheetah-medium-v2',
-            'hopper-medium-v2', 
-            'walker2d-medium-v2',
-            'halfcheetah-medium-replay-v2', 
-            'hopper-medium-replay-v2', 
-            'walker2d-medium-replay-v2',
-            'halfcheetah-medium-expert-v2',
-            'hopper-medium-expert-v2',
-            'walker2d-medium-expert-v2',
-            'halfcheetah-expert-v2',
-            'hopper-expert-v2',
-            'walker2d-expert-v2',
-            'halfcheetah-random-v2',
-            'hopper-random-v2',
-            'walker2d-random-v2']
-    
-    
+    envs = ['halfcheetah-medium-replay-v2',# 'hopper-medium-replay-v2',
+            'walker2d-medium-replay-v2']
     for env in envs:
         try:
-            csv_files = retrieve_csv_files(directory='experiments', env_name=env)
+            file_path = os.path.join(os.pardir, 'experiments/offline')
+            csv_files = retrieve_csv_files(directory=file_path, env_name=env)
+            print(csv_files)
         except Exception:
             continue
         plot_results(file_paths=csv_files)

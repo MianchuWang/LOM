@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.nn.utils.parametrizations import spectral_norm
 from torch.distributions.normal import Normal
 from torch.distributions import MultivariateNormal
@@ -144,18 +145,41 @@ class Qnetwork(nn.Module):
         output = self.model(input)
         return output
 
-class Binary_Classifier(nn.Module):
-    def __init__(self, state_dim, ac_dim):
-        super(Binary_Classifier, self).__init__()
+class CVAE_network(nn.Module):
+    def __init__(self, state_dim, ac_dim, latent_dim=64):
+        super(CVAE_network, self).__init__()
+
+        # Encoder
+        self.fc1 = nn.Linear(state_dim + ac_dim, 256)
+        self.fc21 = nn.Linear(256, latent_dim)  # mean
+        self.fc22 = nn.Linear(256, latent_dim)  # log variance
+
+        # Decoder
+        self.fc3 = nn.Linear(state_dim + latent_dim, 256)
+        self.fc4 = nn.Linear(256, ac_dim)
+        
+        self.latent_dim = latent_dim
         self.state_dim = state_dim
         self.ac_dim = ac_dim
-        self.model = nn.Sequential(nn.Linear(state_dim+ac_dim, 256),
-                                   nn.ReLU(),
-                                   nn.Linear(256, 256),
-                                   nn.ReLU(),
-                                   nn.Linear(256, 1))
-    
-    def forward(self, state, action):
-        input = torch.cat([state, action], dim=1)
-        output = torch.sigmoid(self.model(input))
-        return output
+
+    def encode(self, states, actions):
+        combined = torch.cat([states, actions], 1)
+        h1 = F.relu(self.fc1(combined))
+        return self.fc21(h1), self.fc22(h1)
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def decode(self, z, states):
+        combined = torch.cat([z, states], 1)
+        h3 = F.relu(self.fc3(combined))
+        return self.fc4(h3)
+
+    def forward(self, states, actions):
+        mu, logvar = self.encode(states, actions)
+        z = self.reparameterize(mu, logvar)
+        return self.decode(z, states), mu, logvar
+
+
