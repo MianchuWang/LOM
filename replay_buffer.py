@@ -20,6 +20,8 @@ class ReplayBuffer:
         self.is_full = False
         self.curr_ptr = 0
         self.discount = discount
+        
+        self.sequence_eligible_indices = None
       
     def load_dataset(self, dataset, compute_return=True):
         dataset_size = dataset['observations'].shape[0]
@@ -81,3 +83,23 @@ class ReplayBuffer:
 
         return ret_obs, ret_actions, ret_rewards, ret_next_obs, ret_terminals, ret_returns
     
+    def sample_sequences(self, batch_size, sequence_length):
+        if self.sequence_eligible_indices == None:
+            boarder = self.get_bounds()
+            all_indices = np.arange(boarder)
+            terminal_indices = np.where(self.terminals)[0]
+            eligible_indices = all_indices
+            for i in range(sequence_length):
+                eligible_indices = np.setdiff1d(eligible_indices, terminal_indices-i)
+    
+    
+        start_idxs = np.random.randint(0, boarder, batch_size)
+        range_idxs = start_idxs[:, None] + np.arange(sequence_length)
+        
+        sequences_obs = self.obs[range_idxs]
+        sequences_actions = self.actions[range_idxs]
+    
+        return sequences_obs, sequences_actions
+ 
+
+

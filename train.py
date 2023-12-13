@@ -15,15 +15,15 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='walker2d-medium-replay-v2')
-parser.add_argument('--agent', type=str, default='CVAE')
+parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
+parser.add_argument('--agent', type=str, default='seqCVAE-detpi')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
-parser.add_argument('--project', type=str, default='offline-t')
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
+parser.add_argument('--project', type=str, default='offline')
 parser.add_argument('--group', type=str, default='')
 parser.add_argument('--training_steps', type=int, default=100000)  
 parser.add_argument('--eval_episodes', type=int, default=25) 

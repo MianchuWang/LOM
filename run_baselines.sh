@@ -5,8 +5,7 @@ num_gpus=$(nvidia-smi -L | wc -l)
 num_envs=${#envs[@]}
 
 for ((i=0; i<num_envs; i++)); do
-    cuda=$((i % num_gpus))
-    CUDA_VISIBLE_DEVICES=$cuda python train.py --env_name ${envs[i]} &
+    CUDA_VISIBLE_DEVICES=$((i % num_gpus)) python train.py --env_name ${envs[i]} &
 done
 
 
