@@ -30,34 +30,3 @@ class BC(BaseAgent):
             ac_dist, action = self.policy(state_prep)
             action = ac_dist.sample()
         return action.cpu().numpy().squeeze()
-    
-    def plot_actions(self, state=None):
-        if state is None:
-            state, _, _, _, _ = self.replay_buffer.sample(1)
-        state, _, _, _, _ = self.preprocess(states=state[np.newaxis])
-        state = state.squeeze()
-         
-        actions = [self.policy(state)[0].sample().cpu().numpy().squeeze() for _ in range(10000)]
-        actions = np.array(actions)
-        
-        import seaborn as sns
-        import matplotlib.pyplot as plt
-            # Set the seaborn style for better aesthetics
-        sns.set(style="whitegrid")
-    
-        # Determine the number of subplots needed
-        num_dims = actions.shape[1]
-        num_rows = num_dims // 3 + (num_dims % 3 > 0)
-        plt.figure(figsize=(15, 4 * num_rows))
-    
-        # Plotting each action dimension
-        for i in range(num_dims):
-            plt.subplot(num_rows, min(num_dims, 3), i + 1)
-            sns.histplot(actions[:, i], bins=50, kde=False, color='skyblue')
-            plt.xlabel(f'Dimension {i+1}')
-            plt.ylabel('Frequency')
-            plt.title(f'Action Distribution - Dimension {i+1}')
-            plt.grid(True)
-    
-        plt.tight_layout()
-        plt.show()

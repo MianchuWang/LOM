@@ -28,5 +28,8 @@ def return_agent(**agent_params):
     elif agent_params['agent'].startswith('seqCVAE'):
         from agents.seq_cvae import seqCVAE
         return seqCVAE(**agent_params)
+    elif agent_params['agent'].startswith('seqGMM'):
+        from agents.seq_gmm import seqGMM
+        return seqGMM(**agent_params)
     else:
         raise Exception('Invalid agent!')

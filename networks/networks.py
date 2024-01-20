@@ -182,4 +182,44 @@ class CVAE_network(nn.Module):
         z = self.reparameterize(mu, logvar)
         return self.decode(z, states), mu, logvar
 
+class MixtureGaussianPolicy(nn.Module):
+    def __init__(self, state_dim, action_dim, num_mixtures=2):
+        super(MixtureGaussianPolicy, self).__init__()
+        self.state_dim = state_dim
+        self.action_dim = action_dim
+        self.num_mixtures = num_mixtures
 
+        # Layers for mean, log standard deviation, and mixture weights
+        self.mean_layer = nn.Linear(state_dim, action_dim * num_mixtures)
+        self.log_std_layer = nn.Linear(state_dim, action_dim * num_mixtures)
+        self.weights_layer = nn.Linear(state_dim, num_mixtures)
+
+    def forward(self, state):
+        means = self.mean_layer(state).view(-1, self.num_mixtures, self.action_dim)
+        log_stds = self.log_std_layer(state).view(-1, self.num_mixtures, self.action_dim)
+        weights = F.softmax(self.weights_layer(state), dim=-1)
+
+        return means, log_stds, weights
+
+    def sample_action(self, state):
+        means, log_stds, weights = self.forward(state)
+        stds = log_stds.exp()
+
+        # Choose a component from the mixture
+        mixture_indices = torch.multinomial(weights, 1).squeeze(-1)
+        chosen_means = means[torch.arange(means.size(0)), mixture_indices]
+        chosen_stds = stds[torch.arange(stds.size(0)), mixture_indices]
+
+        # Sample from the chosen Gaussian
+        normal = torch.distributions.Normal(chosen_means, chosen_stds)
+        action = normal.sample()
+
+        return action
+
+    def sample_action_from_all(self, state):
+        mean = self.mean_layer(state).view(-1, self.num_mixtures, self.action_dim)
+        log_std = self.log_std_layer(state).view(-1, self.num_mixtures, self.action_dim)
+        std = log_std.exp()  # Convert log standard deviations to standard deviations
+        normal_dist = torch.distributions.Normal(mean, std)  # Define the normal distribution
+        action = normal_dist.rsample()  # Sample an action
+        return action
