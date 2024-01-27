@@ -11,12 +11,13 @@ from networks.networks import CVAE_network, Qnetwork
 
 
 class temp_MixtureGaussianPolicy(nn.Module):
-    def __init__(self, state_dim, action_dim, latent_dim, num_mixtures=2):
+    def __init__(self, state_dim, action_dim, latent_dim, num_mixtures=2, sample_quantile=0.6):
         super(temp_MixtureGaussianPolicy, self).__init__()
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.num_mixtures = num_mixtures
         self.latent_dim = latent_dim
+        self.sample_quantile = sample_quantile
 
         # Layers for mean, log standard deviation, and mixture weights
         self.first_layer = nn.Sequential(nn.Linear(state_dim, 256), nn.ReLU())
@@ -44,7 +45,7 @@ class temp_MixtureGaussianPolicy(nn.Module):
         stds = log_stds.exp()
 
         # Choose a component from the mixture
-        weights[weights < torch.quantile(weights, 0.6)] = 0
+        weights[weights < torch.quantile(weights, self.sample_quantile)] = 0
         mixture_indices = torch.multinomial(weights, 1).squeeze(-1)
         chosen_means = means[torch.arange(means.size(0)), mixture_indices]
         chosen_stds = stds[torch.arange(stds.size(0)), mixture_indices]
@@ -63,10 +64,11 @@ class seqGMM(BaseAgent):
         self.alpha = 2.5
         self.training_steps = 0
         self.policy_delay = 2
+        self.sample_quantile = 0.6
         self.latent = torch.randn(1, self.latent_dim).to(device=self.device)
 
-        self.policy = temp_MixtureGaussianPolicy(self.state_dim, self.ac_dim, self.latent_dim, self.num_mixtures).to(device=self.device)
-        self.target_policy = temp_MixtureGaussianPolicy(self.state_dim, self.ac_dim, self.latent_dim, self.num_mixtures).to(device=self.device)
+        self.policy = temp_MixtureGaussianPolicy(self.state_dim, self.ac_dim, self.latent_dim, self.num_mixtures, self.sample_quantile).to(device=self.device)
+        self.target_policy = temp_MixtureGaussianPolicy(self.state_dim, self.ac_dim, self.latent_dim, self.num_mixtures, self.sample_quantile).to(device=self.device)
         self.target_policy.load_state_dict(self.policy.state_dict())
         self.policy_opt = torch.optim.Adam(self.policy.parameters(), lr=1e-3)
 
@@ -77,11 +79,11 @@ class seqGMM(BaseAgent):
         self.attention_opt = torch.optim.Adam(self.attention.parameters(), lr=1e-3)
 
 
-        self.K = 4
+        self.K = 2
         self.q_nets, self.q_target_nets, self.q_net_opts = [], [], []
         for k in range(self.K):
-            self.q_nets.append(Qnetwork(self.state_dim, self.ac_dim).to(device=self.device))
-            self.q_target_nets.append(Qnetwork(self.state_dim, self.ac_dim).to(device=self.device))
+            self.q_nets.append(Qnetwork(self.state_dim, 2*self.ac_dim).to(device=self.device))
+            self.q_target_nets.append(Qnetwork(self.state_dim, 2*self.ac_dim).to(device=self.device))
             self.q_target_nets[k].load_state_dict(self.q_nets[k].state_dict())
             self.q_net_opts.append(torch.optim.Adam(self.q_nets[k].parameters(), lr=3e-4))
 
@@ -138,33 +140,34 @@ class seqGMM(BaseAgent):
 
         return {'training/attention_loss': attention_loss.item()}
 
-    def compute_values(self, states, actions):
+    def compute_values(self, states, means, log_stds):
         values = torch.zeros(states.shape[0], self.K, 1).to(device=self.device)
         for i in range(self.K):
-            values[:, i] = self.q_nets[i](states, actions)
+            dist = torch.cat([means, log_stds], dim=-1)
+            values[:, i] = self.q_nets[i](states, dist)
         uncertainties = values.std(dim=1)
         means = values.mean(dim=1)
         return means, uncertainties
 
     def train_value_function(self, batch_size):
-        states, actions, rewards, next_states, terminals = self.replay_buffer.sample(batch_size)
+        states, actions, rewards, next_states, next_actions, terminals = self.replay_buffer.sample_with_next_action(batch_size)
         states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = \
-            self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                            terminals=terminals)
+            self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states, terminals=terminals)
+        _, next_actions_prep, _, _, _ = self.preprocess(actions=next_actions)
 
         with torch.no_grad():
-            target_actions, _ = self.target_policy.sample_action(next_states_prep, None)
-            smooth_noise = torch.clamp(0.2 * torch.randn_like(target_actions), -0.5, 0.5)
-            target_actions = torch.clamp(target_actions + smooth_noise, -1, 1)
-
+            gmm_next_means, gmm_next_log_std = self.identify_gmm_components(next_states_prep, next_actions_prep)
+            next_dist = torch.cat([gmm_next_means, gmm_next_log_std], dim=-1)
             q_next_values = torch.zeros(self.K, batch_size, 1).to(device=self.device)
             for i in range(self.K):
-                q_next_values[i] = self.q_target_nets[i](next_states_prep, target_actions)
+                q_next_values[i] = self.q_target_nets[i](next_states_prep, next_dist)
             q_next_value = torch.min(q_next_values, dim=0)[0]
             target_q_value = rewards_prep + (1 - terminals_prep) * self.discount * q_next_value
 
         for k in range(self.K):
-            pred_q_value = self.q_nets[k](states_prep, actions_prep)
+            gmm_means, gmm_log_std = self.identify_gmm_components(states_prep, actions_prep)
+            curr_dist = torch.cat([gmm_means, gmm_log_std], dim=-1)
+            pred_q_value = self.q_nets[k](states_prep, curr_dist)
             q_loss = ((target_q_value - pred_q_value) ** 2).mean()
             self.q_net_opts[k].zero_grad()
             q_loss.backward()
@@ -195,10 +198,12 @@ class seqGMM(BaseAgent):
 
         extended_states = state_prep.unsqueeze(1).repeat(1, self.num_mixtures, 1)
         value_means, uncertainties = self.compute_values(extended_states.reshape(-1, self.state_dim),
-                                                         means.reshape(-1, self.ac_dim))
+                                                         means.reshape(-1, self.ac_dim),
+                                                         log_stds.reshape(-1, self.ac_dim))
+
         scores = (value_means - value_means.mean())
         scores = scores.reshape(1, self.num_mixtures)
-        scores[weights<0.1] = -1000
+        scores[weights < torch.quantile(weights, self.sample_quantile)] = -1000
         class_label = torch.argmax(scores, dim=1)
         return means[0, class_label].cpu().numpy().squeeze()
         '''
@@ -243,5 +248,42 @@ class seqGMM(BaseAgent):
         # Negative log likelihood
         loss = -log_sum_exp.mean()
         return loss
+
+
+    def identify_gmm_components(self, states_prep, actions_prep):
+        """
+        Get the mean and log standard deviation of the GMM components most likely
+        to sample actions_prep.
+
+        :param states: Tensor of shape [batch_size, state_dim], current states.
+        :param actions_prep: Tensor of shape [batch_size, action_dim], preprocessed actions.
+        :return: Tensors of the means and log_stds of the most likely GMM components for each action in the batch.
+        """
+        with torch.no_grad():
+            latent = torch.randn(states_prep.shape[0], self.latent_dim).to(self.device)
+            means, log_stds, weights, _ = self.policy(states_prep, latent)
+
+            # Expand actions to match the shape of means and stds
+            actions_expanded = actions_prep.unsqueeze(1).expand_as(means)
+
+            # Compute log probabilities for each Gaussian in the mixture
+            stds = log_stds.exp()
+            log_probs = self.log_prob_gaussian(actions_expanded, means, stds)
+
+            # Sum log probabilities over action dimensions
+            log_probs = log_probs.sum(-1)  # shape: [batch_size, num_mixtures]
+
+            log_probs[weights<torch.quantile(weights, self.sample_quantile)] = -10000
+
+            # Find the index of the maximum log probability for each batch item
+            most_likely_components = log_probs.argmax(dim=1)
+
+            # Gather the means and log_stds of the most likely components
+            most_likely_means = means[torch.arange(means.size(0)), most_likely_components]
+            most_likely_log_stds = log_stds[torch.arange(log_stds.size(0)), most_likely_components]
+
+        return most_likely_means, most_likely_log_stds
+
+
 
 
