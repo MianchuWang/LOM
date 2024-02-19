@@ -63,10 +63,11 @@ class Dynamics(nn.Module):
         return state + output
 
 class Policy(nn.Module):
-    def __init__(self, state_dim, ac_dim):
+    def __init__(self, state_dim, ac_dim, deterministic=False):
         super(Policy, self).__init__()
         self.state_dim = state_dim
         self.ac_dim = ac_dim
+        self.deterministic = deterministic
         self.model = nn.Sequential(nn.Linear(state_dim, 256),
                                    nn.ReLU(),
                                    nn.Linear(256, 256),
@@ -77,9 +78,12 @@ class Policy(nn.Module):
 
     def forward(self, s):
         loc = torch.tanh(self.model(s))
-        scale = torch.exp(self.log_std)
-        normal_dist = Normal(loc, scale)
-        return normal_dist, loc
+        if self.deterministic:
+            return loc
+        else:
+            scale = torch.exp(self.log_std)
+            normal_dist = Normal(loc, scale)
+            return normal_dist, loc
 
 
 class MixedGaussianPolicy(nn.Module):
