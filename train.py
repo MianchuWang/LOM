@@ -15,14 +15,14 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='halfcheetah-medium-expert-v2')
-parser.add_argument('--agent', type=str, default='seqGMM')
+parser.add_argument('--env_name', type=str, default='hopper-expert-v2')
+parser.add_argument('--agent', type=str, default='EXPLO')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
 parser.add_argument('--project', type=str, default='seqGMM')
 parser.add_argument('--group', type=str, default='seqGMM')
 parser.add_argument('--training_steps', type=int, default=400000)
@@ -32,7 +32,7 @@ parser.add_argument('--log_path', type=str, default='./experiments/')
 
 args = parser.parse_args()
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
-args.group = args.env_name + '-' + args.group + args.agent
+args.group = args.env_name + '_' + args.agent
 
 # EXPLORATION Parameters
 explo_params = {}

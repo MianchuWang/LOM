@@ -121,10 +121,10 @@ class seqGMM(BaseAgent):
         delta_actions = self.delta_policy(delta_policy_input)
         gen_actions = loc.detach() + delta_actions
         with torch.no_grad():
-            #std = torch.clamp(std_log.exp(), 0, 0.01)
-            #sampled_actions = torch.normal(loc, std)
-            #sampled_actions = torch.clip(sampled_actions, -1, 1)
-            sampled_actions = loc
+            std = torch.clamp(std_log.exp(), 0, 100)
+            sampled_actions = torch.normal(loc, std)
+            sampled_actions = torch.clip(sampled_actions, -1, 1)
+            # sampled_actions = loc
 
             values_2 = torch.zeros(self.K, batch_size, 1).to(device=self.device)
             for k in range(self.K):

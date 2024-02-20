@@ -12,8 +12,9 @@ def retrieve_csv_files(directory, env_name):
             for file in files:
                 if file.endswith('.csv'):
                     full_path = os.path.join(current_path, file)
-                    if full_path.split('/')[3].split('_')[1] == env_name:
+                    if full_path.split('/')[3].split('_')[0] == env_name:
                         csv_files.append(full_path)
+                        
     else:
         raise Exception(f"Directory not found: {directory}")
     if len(csv_files) == 0:
@@ -39,9 +40,8 @@ def plot_results(file_paths):
     # Read data
     for file_path in file_paths:
         data = pd.read_csv(file_path)
-        algo = file_path.split('/')[3].split('_')[0]  # Extract algo name from file path
-
-        if 'total steps' in data.columns and 'normalized score' in data.columns:
+        algo = file_path.split('/')[3].split('_')[1]  # Extract algo name from file path
+        if 'total steps' in data.columns and 'policy/bc_ratio' in data.columns:
             algo_data[algo].append(data)
         else:
             print(f"Required columns not found in the file: {file_path}")
@@ -57,7 +57,7 @@ def plot_results(file_paths):
         # Interpolate 'normalized score' for the common 'total steps'
         interpolated_scores = []
         for data in data_list:
-            interpolated = np.interp(common_steps, data['total steps'], data['normalized score'])
+            interpolated = np.interp(common_steps, data['total steps'], data['policy/bc_ratio'])
             interpolated_scores.append(interpolated)
 
         # Convert list of np.arrays to 2D np.array
@@ -104,13 +104,11 @@ def plot_results(file_paths):
 
 
 def plot_main_experiments():
-    envs = ['halfcheetah-medium-replay-v2',# 'hopper-medium-replay-v2',
-            'walker2d-medium-replay-v2']
+    envs = ['hopper-expert-v2']
     for env in envs:
         try:
-            file_path = os.path.join(os.pardir, 'experiments/offline')
+            file_path = os.path.join(os.pardir, 'experiments/seqGMM')
             csv_files = retrieve_csv_files(directory=file_path, env_name=env)
-            print(csv_files)
         except Exception:
             continue
         plot_results(file_paths=csv_files)

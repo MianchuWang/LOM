@@ -62,8 +62,9 @@ class EXPLORATION(TD3BC):
         
         gen_dist, gen_actions = self.policy(states_prep)
         with torch.no_grad():
-            sampled_actions = gen_dist.sample()
-            sampled_actions = torch.clip(sampled_actions, -1, 1)
+            #sampled_actions = gen_dist.sample()
+            #sampled_actions = torch.clip(sampled_actions, -1, 1)
+            sampled_actions = actions_prep
             
             values_2 = torch.zeros(self.K, batch_size, 1).to(device=self.device)
             for k in range(self.K):
@@ -98,7 +99,14 @@ class EXPLORATION(TD3BC):
         bc_dist, _ = self.behaviour_policy(states_prep)
         kl_div = kl_divergence(gen_dist, bc_dist)
         
-        return {'policy/loss': policy_loss.item(),
+        with torch.no_grad():
+            gen_dist, gen_actions = self.policy(states_prep)
+            bc_dist, _ = self.behaviour_policy(states_prep)
+            bc_log_prob = bc_dist.log_prob(gen_actions)
+            bc_ratio = (bc_log_prob).sum(dim=1).mean()
+        
+        return {'policy/bc_ratio': bc_ratio.item(),
+                'policy/loss': policy_loss.item(),
                 'policy/weights2': weights_exp_2.mean().item(),
                 'policy/kl_divergence': kl_div.mean().item(),
                 'policy/value_uncertainty': value_uncertainty.mean().item()}
