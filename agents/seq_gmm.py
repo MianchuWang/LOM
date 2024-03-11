@@ -55,7 +55,6 @@ class seqGMM(BaseAgent):
     def __init__(self, **agent_params):
         super().__init__(**agent_params)
         self.num_mixtures = 20
-        self.alpha = 2.5
         self.training_steps = 0
         self.policy_delay = 2
         self.sample_quantile = 0.6
@@ -67,11 +66,13 @@ class seqGMM(BaseAgent):
         self.target_policy.load_state_dict(self.policy.state_dict())
         self.policy_opt = torch.optim.Adam(self.policy.parameters(), lr=1e-3)
 
-        self.delta_policy = Policy(self.state_dim + 2 * self.ac_dim, self.ac_dim, deterministic=True).to(
-            device=self.device)
+        self.delta_policy = Policy(self.state_dim, self.ac_dim, deterministic=True).to(device=self.device)
+        self.target_delta_policy = Policy(self.state_dim, self.ac_dim, deterministic=True).to(device=self.device)
+        self.target_delta_policy.load_state_dict(self.delta_policy.state_dict())
         self.delta_policy_opt = torch.optim.Adam(self.delta_policy.parameters(), lr=1e-3)
 
-        self.mode_K = 2
+
+        self.mode_K = 4
         self.q_mode_nets, self.q_mode_target_nets, self.q_mode_net_opts = [], [], []
         for k in range(self.mode_K):
             self.q_mode_nets.append(Qnetwork(self.state_dim, 2 * self.ac_dim).to(device=self.device))
@@ -89,12 +90,14 @@ class seqGMM(BaseAgent):
 
 
     def train_models(self, batch_size=512):
+        GMM_info = {}
         GMM_info = self.train_GMM(batch_size=batch_size)
         delta_policy_info = self.train_delta_policy(batch_size=batch_size)
         mode_value_info = self.train_mode_value_function(batch_size=batch_size)
         value_info = self.train_value_function(batch_size=batch_size)
         if self.training_steps % self.policy_delay == 0:
             self.update_target_nets([self.policy], [self.target_policy])
+            self.update_target_nets([self.delta_policy], [self.target_delta_policy])
             self.update_target_nets(self.q_mode_nets, self.q_mode_target_nets)
             self.update_target_nets(self.q_nets, self.q_target_nets)
         self.training_steps += 1
@@ -116,15 +119,12 @@ class seqGMM(BaseAgent):
         states, _, _, _, _ = self.replay_buffer.sample(batch_size)
         states_prep, _, _, _, _ = self.preprocess(states=states)
 
-        loc, std_log = self.mode_policy(states_prep)
-        delta_policy_input = torch.cat([states_prep, loc, std_log], dim=-1)
-        delta_actions = self.delta_policy(delta_policy_input)
-        gen_actions = loc.detach() + delta_actions
+        gen_actions = self.delta_policy(states_prep)
         with torch.no_grad():
-            std = torch.clamp(std_log.exp(), 0, 100)
+            loc, std_log = self.mode_policy(states_prep)
+            std = torch.clamp(std_log.exp(), 0, 10)
             sampled_actions = torch.normal(loc, std)
             sampled_actions = torch.clip(sampled_actions, -1, 1)
-            # sampled_actions = loc
 
             values_2 = torch.zeros(self.K, batch_size, 1).to(device=self.device)
             for k in range(self.K):
@@ -149,15 +149,12 @@ class seqGMM(BaseAgent):
 
 
     def train_value_function(self, batch_size):
-        states, actions, rewards, next_states, next_actions, terminals = self.replay_buffer.sample_with_next_action(
-            batch_size)
+        states, actions, rewards, next_states, terminals  = self.replay_buffer.sample(batch_size)
         states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = \
-            self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states,
-                            terminals=terminals)
-        _, next_actions_prep, _, _, _ = self.preprocess(actions=next_actions)
+            self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states, terminals=terminals)
 
         with torch.no_grad():
-            target_actions = self.current_policy(next_states_prep)
+            target_actions = self.target_delta_policy(next_states_prep)
             smooth_noise = torch.clamp(0.2 * torch.randn_like(target_actions), -0.5, 0.5)
             target_actions = torch.clamp(target_actions + smooth_noise, -1, 1)
 
@@ -169,7 +166,7 @@ class seqGMM(BaseAgent):
 
         for k in range(self.K):
             pred_q_value = self.q_nets[k](states_prep, actions_prep)
-            q_loss = ((target_q_value - pred_q_value) ** 2).mean()
+            q_loss = ((target_q_value - pred_q_value)**2).mean()
             self.q_net_opts[k].zero_grad()
             q_loss.backward()
             self.q_net_opts[k].step()
@@ -244,10 +241,9 @@ class seqGMM(BaseAgent):
 
 
     def current_policy(self, state):
-        loc, std = self.mode_policy(state)
-        delta_policy_input = torch.cat([state, loc, std], dim=-1)
-        delta = self.delta_policy(delta_policy_input)
-        action = loc + delta
+        # loc, std = self.mode_policy(state)
+        # action = loc + 0 * delta
+        action = self.delta_policy(state)
         return action
 
 
@@ -255,7 +251,8 @@ class seqGMM(BaseAgent):
     def get_action(self, state):
         state_prep, _, _, _, _ = self.preprocess(states=state[np.newaxis])
         action = self.current_policy(state_prep).cpu().numpy().squeeze()
-        return action
+        clipped_action = np.clip(action, -1, 1)
+        return clipped_action
 
 
     def log_prob_gaussian(self, x, mean, std):
