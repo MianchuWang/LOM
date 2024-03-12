@@ -100,20 +100,10 @@ class GMM(BaseAgent):
 
     def compute_loss(self, means, log_stds, weights, actions):
         batch_size, num_mixtures, _ = means.shape
-
         actions_expanded = actions.unsqueeze(1).expand_as(means)
-
-        # Compute log probabilities for each Gaussian in the mixture
         stds = log_stds.exp()
-        log_probs = self.log_prob_gaussian(actions_expanded, means, stds)
-
-        # Sum log probabilities over action dimensions
-        log_probs = log_probs.sum(-1)  # shape: [batch_size, num_mixtures]
-        weighted_log_probs = weights * log_probs.exp()
-        weighted_log_probs = torch.clamp(weighted_log_probs, 0.002, None)
-        log_sum_exp = torch.log(weighted_log_probs.sum(dim=1, keepdim=True))
-
-        # Negative log likelihood
-        loss = - log_sum_exp.mean()
+        log_probs = self.log_prob_gaussian(actions_expanded, means, stds).sum(-1)
+        weighted_log_probs = torch.log(weights) + log_probs
+        loss = - weighted_log_probs.sum(dim=1).mean()
         return loss
 
