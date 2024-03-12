@@ -13,21 +13,9 @@ def return_agent(**agent_params):
     elif agent_params['agent'].startswith('AWR'):
         from agents.awr import AWR
         return AWR(**agent_params)
-    elif agent_params['agent'].startswith('BPI'):
-        from agents.bpi import BPI
-        return BPI(**agent_params)
-    elif agent_params['agent'].startswith('CPI'):
-        from agents.cpi import CPI
-        return CPI(**agent_params)
-    elif agent_params['agent'].startswith('EXPLO'):
-        from agents.exploration import EXPLORATION
-        return EXPLORATION(**agent_params)
-    elif agent_params['agent'].startswith('CVAE'):
-        from agents.cvae import CVAE
-        return CVAE(**agent_params)
-    elif agent_params['agent'].startswith('seqCVAE'):
-        from agents.seq_cvae import seqCVAE
-        return seqCVAE(**agent_params)
+    elif agent_params['agent'].startswith('GMM'):
+        from agents.gmm import GMM
+        return GMM(**agent_params)
     elif agent_params['agent'].startswith('seqGMM'):
         from agents.seq_gmm import seqGMM
         return seqGMM(**agent_params)
