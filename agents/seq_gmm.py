@@ -92,9 +92,9 @@ class seqGMM(BaseAgent):
     def train_models(self, batch_size=512):
         GMM_info = {}
         GMM_info = self.train_GMM(batch_size=batch_size)
-        delta_policy_info = self.train_delta_policy(batch_size=batch_size)
+        delta_policy_info = {}#self.train_delta_policy(batch_size=batch_size)
         mode_value_info = self.train_mode_value_function(batch_size=batch_size)
-        value_info = self.train_value_function(batch_size=batch_size)
+        value_info = {} #self.train_value_function(batch_size=batch_size)
         if self.training_steps % self.policy_delay == 0:
             self.update_target_nets([self.policy], [self.target_policy])
             self.update_target_nets([self.delta_policy], [self.target_delta_policy])
@@ -241,9 +241,9 @@ class seqGMM(BaseAgent):
 
 
     def current_policy(self, state):
-        # loc, std = self.mode_policy(state)
-        # action = loc + 0 * delta
-        action = self.delta_policy(state)
+        loc, std = self.mode_policy(state)
+        action = loc# + 0 * delta
+        #action = self.delta_policy(state)
         return action
 
 

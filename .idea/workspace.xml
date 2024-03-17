@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="680fc2c0-10a7-49b4-93d6-8fd846b63cd9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/agents/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/bpi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/cpi.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/cvae.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/exploration.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/seq_cvae.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/bc.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/bc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/gmm.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/gmm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/seq_gmm.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/seq_gmm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -24,10 +22,10 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2dHxp6EwtcgA5JiUlupG3V8K8ri" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -65,7 +63,7 @@
       <window_info anchor="bottom" id="Python Console" />
       <window_info anchor="bottom" id="Version Control" order="0" />
       <window_info anchor="bottom" id="Problems View" order="1" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.66503394" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.33854166" />
       <window_info anchor="bottom" id="Services" order="3" />
       <window_info anchor="right" id="Endpoints" />
       <window_info anchor="right" id="SciView" />
@@ -84,6 +82,7 @@
       <updated>1709678985203</updated>
       <workItem from="1709678986545" duration="11293000" />
       <workItem from="1710246270168" duration="84000" />
+      <workItem from="1710288376853" duration="19353000" />
     </task>
     <servers />
   </component>
