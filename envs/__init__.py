@@ -16,7 +16,8 @@ mujoco_locomotion = ['halfcheetah-medium-v2',
                      'walker2d-expert-v2',
                      'halfcheetah-random-v2',
                      'hopper-random-v2',
-                     'walker2d-random-v2']
+                     'walker2d-random-v2'
+                     'maze2d-open-v0']
 
 
 def return_environment(env_name):
