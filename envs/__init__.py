@@ -16,13 +16,20 @@ mujoco_locomotion = ['halfcheetah-medium-v2',
                      'walker2d-expert-v2',
                      'halfcheetah-random-v2',
                      'hopper-random-v2',
-                     'walker2d-random-v2'
-                     'maze2d-open-v0']
+                     'walker2d-random-v2']
+
+maze_envs = ['maze2d-big-open']
 
 
 def return_environment(env_name):
     if env_name in mujoco_locomotion:
         env = gym.make(env_name)
+        env_info = {'state_dim': env.observation_space.shape[0],
+                    'ac_dim': env.action_space.shape[0]}
+        return env, env_info
+    elif env_name in maze_envs:
+        from envs.big_open_maze import MazeEnv
+        env = MazeEnv()
         env_info = {'state_dim': env.observation_space.shape[0],
                     'ac_dim': env.action_space.shape[0]}
         return env, env_info

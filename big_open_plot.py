@@ -7,6 +7,7 @@ import os
 import time
 import d4rl
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from replay_buffer import ReplayBuffer
 from envs import return_environment, mujoco_locomotion, maze_envs
@@ -16,7 +17,7 @@ import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--env_name', type=str, default='maze2d-big-open')
-parser.add_argument('--agent', type=str, default='GMM')
+parser.add_argument('--agent', type=str, default='BC')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
@@ -26,7 +27,7 @@ parser.add_argument('--render', type=int, default=1)
 parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
 parser.add_argument('--project', type=str, default='benchmark')
 parser.add_argument('--group', type=str, default='seqGMM')
-parser.add_argument('--training_steps', type=int, default=500000)
+parser.add_argument('--training_steps', type=int, default=5000)
 parser.add_argument('--eval_episodes', type=int, default=10)
 parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
@@ -64,11 +65,12 @@ if args.env_name in mujoco_locomotion:
 elif args.env_name in maze_envs:
     dataset = env.get_dataset(os.path.join('datasets', args.env_name + '.hdf5'))
     buffer.load_dataset(dataset)
-agent = return_agent(agent=args.agent, replay_buffer=buffer, 
+bc_agent = return_agent(agent='BC', replay_buffer=buffer, 
                      state_dim=env_info['state_dim'], ac_dim=env_info['ac_dim'], 
                      device=device, discount=args.discount, normalise=args.normalise,
                      **explo_params)
 
+buffer.actions[:, 2:] = 0
 
 def eval_policy(env, agent, render=False):
     avg_reward = 0 
@@ -85,9 +87,7 @@ def eval_policy(env, agent, render=False):
                 env.render()
                 
     avg_reward /= args.eval_episodes
-    normalized_score = 100 * env.get_normalized_score(avg_reward)
-    return {'eval/return': avg_reward,
-            'eval/normalized_score': normalized_score}
+    return {'eval/return': avg_reward}
 
 
 epoch = 0
@@ -95,22 +95,75 @@ for steps in tqdm(range(0, args.training_steps), mininterval=1):
     t_start = time.time()
     
     policy_eval_info = {}
-    training_info = agent.train_models()
+    training_info = bc_agent.train_models()
     
-    if (steps + 1) % args.eval_every == 0:
-        policy_eval_info = eval_policy(env, agent, args.render)
+    #if (steps + 1) % args.eval_every == 0:
+        #policy_eval_info = eval_policy(env, bc_agent, args.render)
+        
+
+
+# Define your observations and threshold
+target_obs_list = [np.array([3.8, 9.2]), np.array([3, 5.75]), np.array([4, 6])]
+threshold = 0.2
+
+# Initialize lists to collect matching observations and actions
+matching_actions_list = []
+bc_actions_list = []
+
+# Loop over each target observation
+for target_obs in target_obs_list:
+    # Create the mask for observations around the target_obs
+    mask = np.all(np.abs(buffer.obs[:, :2] - target_obs) < threshold, axis=1)
     
-        log_info = {**training_info, **policy_eval_info}
-        epoch += 1
-        logger.record_tabular('total steps', steps)
-        logger.record_tabular('training epoch', epoch)
-        logger.record_tabular('epoch time (min)', (time.time() - t_start)/60)
-        for key, val in log_info.items():
-            if type(val) == torch.Tensor:
-                logger.record_tabular(key, val.mean().item())
-            else:
-                logger.record_tabular(key, val)
-        logger.dump_tabular()
+    matching_obs = buffer.obs[mask]
     
-    if args.enable_wandb:
-        wandb.log({**training_info, **policy_eval_info})
+    # Use the mask to get the corresponding actions
+    matching_actions = buffer.actions[mask]
+    matching_actions_list.append(matching_actions)
+    
+    # Get actions from the behavioral cloning agent
+    bc_actions = bc_agent.get_action(matching_obs)
+    bc_actions_list.append(bc_actions)
+
+# Plot the actions in different subplots
+fig, axes = plt.subplots(2, len(target_obs_list), figsize=(18, 12))
+
+# Plot original actions
+for i, (target_obs, matching_actions) in enumerate(zip(target_obs_list, matching_actions_list)):
+    axes[0, i].scatter(matching_actions[:, 0], matching_actions[:, 1], c='blue', label='Actions')
+    axes[0, i].set_xlabel('Action Dimension 1')
+    axes[0, i].set_ylabel('Action Dimension 2')
+    axes[0, i].set_title(f'Actions around {target_obs}')
+    axes[0, i].legend()
+    axes[0, i].grid(True)
+    axes[0, i].set_xlim([-1.2, 1.2])
+    axes[0, i].set_ylim([-1.2, 1.2])
+    
+    # Calculate the mean of the points
+    mean_action = np.mean(matching_actions, axis=0)
+    
+    # Plot an arrow from (0, 0) to the mean
+    axes[0, i].arrow(0, 0, mean_action[0], mean_action[1], head_width=0.05, head_length=0.1, fc='red', ec='red')
+    axes[0, i].annotate(f'Mean: ({mean_action[0]:.2f}, {mean_action[1]:.2f})', xy=(mean_action[0], mean_action[1]), xytext=(mean_action[0] + 0.1, mean_action[1] + 0.1))
+
+# Plot bc_agent actions
+for i, (target_obs, bc_actions) in enumerate(zip(target_obs_list, bc_actions_list)):
+    axes[1, i].scatter(bc_actions[:, 0], bc_actions[:, 1], c='green', label='BC Actions')
+    axes[1, i].set_xlabel('Action Dimension 1')
+    axes[1, i].set_ylabel('Action Dimension 2')
+    axes[1, i].set_title(f'BC Actions around {target_obs}')
+    axes[1, i].legend()
+    axes[1, i].grid(True)
+    axes[1, i].set_xlim([-1.2, 1.2])
+    axes[1, i].set_ylim([-1.2, 1.2])
+    
+    # Calculate the mean of the points
+    mean_bc_action = np.mean(bc_actions, axis=0)
+    
+    # Plot an arrow from (0, 0) to the mean
+    axes[1, i].arrow(0, 0, mean_bc_action[0], mean_bc_action[1], head_width=0.05, head_length=0.1, fc='red', ec='red')
+    axes[1, i].annotate(f'Mean: ({mean_bc_action[0]:.2f}, {mean_bc_action[1]:.2f})', xy=(mean_bc_action[0], mean_bc_action[1]), xytext=(mean_bc_action[0] + 0.1, mean_bc_action[1] + 0.1))
+
+plt.tight_layout()
+plt.show()
+

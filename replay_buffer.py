@@ -29,14 +29,17 @@ class ReplayBuffer:
             raise Exception('The dataset (size ' + str(dataset_size) + ') is ' + \
                             'larger than the buffer capacity (size ' + str(self.buffer_size) + ').')
         self.obs[:dataset_size] = dataset['observations']
-        self.next_obs[:dataset_size] = dataset['next_observations']
+        if 'next_observations' in dataset.keys(): 
+            self.next_obs[:dataset_size] = dataset['next_observations']
+        else:
+            self.next_obs[:dataset_size-1] = dataset['observations'][1:]
         self.actions[:dataset_size] = dataset['actions']
         self.rewards[:dataset_size] = dataset['rewards'][..., np.newaxis]
         self.terminals[:dataset_size] = dataset['terminals'][..., np.newaxis]
         self.curr_ptr = dataset_size
         if dataset_size == self.buffer_size:
             self.is_full = True
-        
+            
         if compute_return:
             ret = 0
             for i in reversed(range(self.curr_ptr)):
@@ -45,6 +48,7 @@ class ReplayBuffer:
                 else:
                     ret = self.rewards[i] + ret * self.discount
                 self.returns[i] = ret
+            
    
     def get_bounds(self):
         boarder = self.buffer_size if self.is_full else self.curr_ptr

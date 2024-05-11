@@ -28,4 +28,5 @@ class BC(BaseAgent):
         with torch.no_grad():
             state_prep, _, _, _, _ = self.preprocess(states=state[np.newaxis])
             ac_dist, action = self.policy(state_prep)
+            #action = ac_dist.sample()
         return action.cpu().numpy().squeeze()

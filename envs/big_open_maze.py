@@ -4,17 +4,6 @@ from gym import utils
 from d4rl import offline_env
 from d4rl.pointmaze.dynamic_mjc import MJCModel
 import numpy as np
-import random
-
-import gym
-import logging
-from d4rl.pointmaze import waypoint_controller
-from d4rl.pointmaze import maze_model
-import numpy as np
-import pickle
-import gzip
-import h5py
-import argparse
 
 
 WALL = 10
@@ -91,77 +80,6 @@ def point_maze(maze_str):
 
     return mjcmodel
 
-
-LARGE_MAZE = \
-        "############\\"+\
-        "#OOOO#OOOOO#\\"+\
-        "#O##O#O#O#O#\\"+\
-        "#OOOOOO#OOO#\\"+\
-        "#O####O###O#\\"+\
-        "#OO#O#OOOOO#\\"+\
-        "##O#O#O#O###\\"+\
-        "#OO#OOO#OGO#\\"+\
-        "############"
-
-LARGE_MAZE_EVAL = \
-        "############\\"+\
-        "#OO#OOO#OGO#\\"+\
-        "##O###O#O#O#\\"+\
-        "#OO#O#OOOOO#\\"+\
-        "#O##O#OO##O#\\"+\
-        "#OOOOOO#OOO#\\"+\
-        "#O##O#O#O###\\"+\
-        "#OOOO#OOOOO#\\"+\
-        "############"
-
-MEDIUM_MAZE = \
-        '########\\'+\
-        '#OO##OO#\\'+\
-        '#OO#OOO#\\'+\
-        '##OOO###\\'+\
-        '#OO#OOO#\\'+\
-        '#O#OO#O#\\'+\
-        '#OOO#OG#\\'+\
-        "########"
-
-MEDIUM_MAZE_EVAL = \
-        '########\\'+\
-        '#OOOOOG#\\'+\
-        '#O#O##O#\\'+\
-        '#OOOO#O#\\'+\
-        '###OO###\\'+\
-        '#OOOOOO#\\'+\
-        '#OO##OO#\\'+\
-        "########"
-
-SMALL_MAZE = \
-        "######\\"+\
-        "#OOOO#\\"+\
-        "#O##O#\\"+\
-        "#OOOO#\\"+\
-        "######"
-
-U_MAZE = \
-        "#####\\"+\
-        "#GOO#\\"+\
-        "###O#\\"+\
-        "#OOO#\\"+\
-        "#####"
-
-U_MAZE_EVAL = \
-        "#####\\"+\
-        "#OOG#\\"+\
-        "#O###\\"+\
-        "#OOO#\\"+\
-        "#####"
-
-OPEN = \
-        "#######\\"+\
-        "#OOOOO#\\"+\
-        "#OOGOO#\\"+\
-        "#OOOOO#\\"+\
-        "#######"
-
 BIG_OPEN = \
         "##############\\"+\
         "#OOOOOOOOOOOO#\\"+\
@@ -176,7 +94,7 @@ BIG_OPEN = \
 
 class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def __init__(self,
-                 maze_spec=U_MAZE,
+                 maze_spec=BIG_OPEN,
                  reward_type='sparse',
                  reset_target=False,
                  **kwargs):
@@ -267,130 +185,13 @@ class MazeEnv(mujoco_env.MujocoEnv, utils.EzPickle, offline_env.OfflineEnv):
     def viewer_setup(self):
         pass
 
-
-
-def reset_data():
-    return {'observations': [],
-            'actions': [],
-            'terminals': [],
-            'rewards': [],
-            'infos/goal': [],
-            'infos/qpos': [],
-            'infos/qvel': [],
-            }
-
-def append_data(data, s, a, tgt, done, env_data):
-    data['observations'].append(s)
-    data['actions'].append(a)
-    data['rewards'].append(0.0)
-    data['terminals'].append(done)
-    data['infos/goal'].append(tgt)
-    data['infos/qpos'].append(env_data.qpos.ravel().copy())
-    data['infos/qvel'].append(env_data.qvel.ravel().copy())
-
-def npify(data):
-    for k in data:
-        if k == 'terminals':
-            dtype = np.bool_
-        else:
-            dtype = np.float32
-
-        data[k] = np.array(data[k], dtype=dtype)
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--render', type=int, default=0, help='Render trajectories')
-    parser.add_argument('--noisy', type=int, default=1, help='Noisy actions')
-    parser.add_argument('--env_name', type=str, default='maze2d-umaze-v1', help='Maze type')
-    parser.add_argument('--num_samples', type=int, default=int(1e4), help='Num samples to collect')
-    args = parser.parse_args()
-
-    #env = gym.make(args.env_name)
-    env = MazeEnv(maze_spec=BIG_OPEN)
-    maze = env.str_maze_spec
-    max_episode_steps = 500 #env._max_episode_steps
-
-    controller = waypoint_controller.WaypointController(maze)
-    # env = maze_model.MazeEnv(maze)
-    env = MazeEnv(maze_spec=BIG_OPEN)
-
-    #env.set_target()
-    s = env.reset()
-    act = env.action_space.sample()
-    done = False
-
-    data = reset_data()
-    ts = 0
-    '''
-    mid_goals = [np.array([3, 9]),
-                 np.array([4, 6]),
-                 np.array([5, 3]),
-                 env._target] # (4, 3)
-    '''
-    mid_goals = [np.array([5, 9]),
-                 np.array([4, 6]),
-                 np.array([3, 3]),
-                 env._target] # (4, 3)
-    
-    mid_goals_idx = 0
-    for _ in range(args.num_samples):
-        position = s[0:2]
-        velocity = s[2:4]
-        act, done = controller.get_action(position, velocity, mid_goals[mid_goals_idx])
-        if args.noisy:
-            act = act + np.random.randn(*act.shape)*0.5
-
-        act = np.clip(act, -1.0, 1.0)
-        if ts >= max_episode_steps:
-            done = True
-        append_data(data, s, act, env._target, done, env.sim.data)
-
-        ns, _, _, _ = env.step(act)
-
-        if len(data['observations']) % 10000 == 0:
-            print(len(data['observations']))
-
-        ts += 1
-        if done:
-            mid_goals_idx += 1
-            done = False
-            if mid_goals_idx == 4:
-                mid_goals_idx = 0
-                env.reset_model()
-                controller = waypoint_controller.WaypointController(env.str_maze_spec)
-                s = env.reset()
-                done = False
-                ts = 0
-        else:
-            s = ns
-
-        if args.render:
-            env.render()
-
-    
-    if args.noisy:
-        fname = '%s-noisy.hdf5' % args.env_name
-    else:
-        fname = '%s.hdf5' % args.env_name
-    dataset = h5py.File(fname, 'w')
-    npify(data)
-    for k in data:
-        dataset.create_dataset(k, data=data[k], compression='gzip')
-
-
-if __name__ == "__main__":
-    main()
-
-# Test the custom environment
-'''
 if __name__ == "__main__":
     env = MazeEnv(maze_spec=BIG_OPEN)
     obs = env.reset()
     for _ in range(5000):
         action = env.action_space.sample()
+        action = np.array([0, 1])
         obs, reward, done, info = env.step(action)
         env.render()
         if done:
             break
-'''
-    
