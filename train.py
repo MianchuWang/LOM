@@ -9,21 +9,21 @@ import d4rl
 from tqdm import tqdm
 
 from replay_buffer import ReplayBuffer
-from envs import return_environment, mujoco_locomotion, maze_envs
+from envs import return_environment, mujoco_locomotion
 from agents import return_agent
 import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='maze2d-big-open')
-parser.add_argument('--agent', type=str, default='GMM')
+parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
+parser.add_argument('--agent', type=str, default='seqGMM')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
-parser.add_argument('--render', type=int, default=1)
+parser.add_argument('--render', type=int, default=0)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
 parser.add_argument('--project', type=str, default='benchmark')
 parser.add_argument('--group', type=str, default='seqGMM')
 parser.add_argument('--training_steps', type=int, default=500000)
@@ -31,15 +31,20 @@ parser.add_argument('--eval_episodes', type=int, default=10)
 parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
 
+parser.add_argument('--num_mixtures', type=int, default=20)
+parser.add_argument('--sample_quantile', type=float, default=0)
+parser.add_argument('--save_gmm', type=int, default=0)
+
+
 args = parser.parse_args()
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
 args.group = args.env_name + '_' + args.agent
 
-# EXPLORATION Parameters
-explo_params = {}
+args_dict = vars(args)
 
 if args.enable_wandb:
-    wandb.init(project=args.project, config=args, group=args.group, name='{}_{}_seed{}'.format(args.agent, args.env_name, args.seed))
+    group = 'M{}_{}_{}'.format(args.num_mixtures, 'LOM', args.env_name)
+    wandb.init(project=args.project, config=args, group=group, name='{}_{}_seed{}'.format(args.agent, args.env_name, args.seed))
 experiments_dir = args.log_path + args.project + '/' + args.group + '/' + '{}_{}_seed{}'.format(args.agent, args.env_name, args.seed) + '/'
 logger.configure(experiments_dir)
 logger.log('This running starts with parameters:')
@@ -61,13 +66,8 @@ buffer = ReplayBuffer(buffer_size=args.buffer_capacity,
                       ac_dim=env_info['ac_dim'], discount=args.discount)
 if args.env_name in mujoco_locomotion:
     buffer.load_dataset(d4rl.qlearning_dataset(env))
-elif args.env_name in maze_envs:
-    dataset = env.get_dataset(os.path.join('datasets', args.env_name + '.hdf5'))
-    buffer.load_dataset(dataset)
-agent = return_agent(agent=args.agent, replay_buffer=buffer, 
-                     state_dim=env_info['state_dim'], ac_dim=env_info['ac_dim'], 
-                     device=device, discount=args.discount, normalise=args.normalise,
-                     **explo_params)
+agent = return_agent(replay_buffer=buffer, state_dim=env_info['state_dim'], 
+                     ac_dim=env_info['ac_dim'], device=device,  **args_dict)
 
 
 def eval_policy(env, agent, render=False):
@@ -78,8 +78,6 @@ def eval_policy(env, agent, render=False):
         while not done:
             action = agent.get_action(obs)
             obs, reward, done, _ = env.step(action)
-            if args.env_name in maze_envs:
-                if reward == 1: done=True
             avg_reward += reward
             if render:
                 env.render()
@@ -114,3 +112,6 @@ for steps in tqdm(range(0, args.training_steps), mininterval=1):
     
     if args.enable_wandb:
         wandb.log({**training_info, **policy_eval_info})
+
+if args.save_gmm:
+    torch.save(agent.policy.state_dict(), 'gmm_models/'+args.env_name+'.pth')

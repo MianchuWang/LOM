@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 
 class BaseAgent(object):
     def __init__(self, *args, **kwargs):
+        self.env_name = kwargs['env_name']
         self.replay_buffer = kwargs['replay_buffer']
         self.state_dim = kwargs['state_dim']
         self.ac_dim = kwargs['ac_dim']

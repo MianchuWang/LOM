@@ -6,9 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="680fc2c0-10a7-49b4-93d6-8fd846b63cd9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/bc.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/bc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/agents/gmm.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/gmm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/agents/base_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/base_agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agents/seq_gmm.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/seq_gmm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/big_open_plot.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/BIG_OPEN/big-open-noisy-1.hdf5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/BIG_OPEN/big-open-noisy-2.hdf5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/maze2d-big-open.hdf5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/envs/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/envs/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/envs/big_open_maze.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/maze2d_dataset_collection.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -63,7 +70,7 @@
       <window_info anchor="bottom" id="Python Console" />
       <window_info anchor="bottom" id="Version Control" order="0" />
       <window_info anchor="bottom" id="Problems View" order="1" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.33854166" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.39826387" />
       <window_info anchor="bottom" id="Services" order="3" />
       <window_info anchor="right" id="Endpoints" />
       <window_info anchor="right" id="SciView" />
@@ -83,6 +90,7 @@
       <workItem from="1709678986545" duration="11293000" />
       <workItem from="1710246270168" duration="84000" />
       <workItem from="1710288376853" duration="19353000" />
+      <workItem from="1715902438974" duration="8062000" />
     </task>
     <servers />
   </component>
