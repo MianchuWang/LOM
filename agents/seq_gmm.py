@@ -33,7 +33,6 @@ class MixtureGaussianPolicy(nn.Module):
     def sample_action(self, state):
         means, log_stds, weights = self.forward(state)
         max_weight_indices = torch.argmax(weights, dim=-1)
-        max_weight_indices[:] = 0
         chosen_means = means[torch.arange(means.size(0)), max_weight_indices]
         return chosen_means
 
@@ -48,7 +47,7 @@ class seqGMM(BaseAgent):
 
         self.policy = MixtureGaussianPolicy(self.state_dim, self.ac_dim, self.num_mixtures,
                                             self.sample_quantile).to(device=self.device)
-        self.policy.load_state_dict(torch.load('gmm_models/' + agent_params['env_name'] + '.pth'))
+        #self.policy.load_state_dict(torch.load('gmm_models/gmm/' + agent_params['env_name'] + '.pth'))
         
         self.target_policy = MixtureGaussianPolicy(self.state_dim, self.ac_dim, self.num_mixtures,
                                                    self.sample_quantile).to(device=self.device)
@@ -61,14 +60,18 @@ class seqGMM(BaseAgent):
         self.delta_policy_opt = torch.optim.Adam(self.delta_policy.parameters(), lr=1e-3)
 
 
-        self.mode_K = 4
+        self.mode_K = 1
         self.q_mode_nets, self.q_mode_target_nets, self.q_mode_net_opts = [], [], []
         for k in range(self.mode_K):
             self.q_mode_nets.append(Qnetwork(self.state_dim, 2 * self.ac_dim).to(device=self.device))
             self.q_mode_target_nets.append(Qnetwork(self.state_dim, 2 * self.ac_dim).to(device=self.device))
             self.q_mode_target_nets[k].load_state_dict(self.q_mode_nets[k].state_dict())
             self.q_mode_net_opts.append(torch.optim.Adam(self.q_mode_nets[k].parameters(), lr=3e-4))
-
+        '''
+        params = torch.load('gmm_models/value_functions/' + agent_params['env_name'] + '.pth')
+        for k in range(self.mode_K):
+            self.q_mode_nets[k].load_state_dict(params[k])
+        '''
         self.K = 4
         self.q_nets, self.q_target_nets, self.q_net_opts = [], [], []
         for k in range(self.K):
@@ -80,15 +83,15 @@ class seqGMM(BaseAgent):
 
     def train_models(self, batch_size=512):
         GMM_info = {}
-        GMM_info = {} #self.train_GMM(batch_size=batch_size)
-        delta_policy_info = self.train_delta_policy(batch_size=batch_size)
+        GMM_info = self.train_GMM(batch_size=batch_size)
+        delta_policy_info = {}#self.train_delta_policy(batch_size=batch_size)
         mode_value_info = self.train_mode_value_function(batch_size=batch_size)
-        value_info = self.train_value_function(batch_size=batch_size)
+        value_info = {}#self.train_value_function(batch_size=batch_size)
         if self.training_steps % self.policy_delay == 0:
-            #self.update_target_nets([self.policy], [self.target_policy])
-            self.update_target_nets([self.delta_policy], [self.target_delta_policy])
+            self.update_target_nets([self.policy], [self.target_policy])
+            #self.update_target_nets([self.delta_policy], [self.target_delta_policy])
             self.update_target_nets(self.q_mode_nets, self.q_mode_target_nets)
-            self.update_target_nets(self.q_nets, self.q_target_nets)
+            #self.update_target_nets(self.q_nets, self.q_target_nets)
         self.training_steps += 1
         return {**GMM_info, **mode_value_info, **value_info, **delta_policy_info}
 
@@ -104,6 +107,7 @@ class seqGMM(BaseAgent):
         log_probs = log_probs.sum(-1)
 
         weighted_log_probs = log_probs + torch.log(weights)
+        
         gmm_loss = - weighted_log_probs.mean()
 
         self.policy_opt.zero_grad()
@@ -121,8 +125,8 @@ class seqGMM(BaseAgent):
         
 
     def train_delta_policy(self, batch_size):
-        states, _, _, _, _ = self.replay_buffer.sample(batch_size)
-        states_prep, _, _, _, _ = self.preprocess(states=states)
+        states, actions, _, _, _ = self.replay_buffer.sample(batch_size)
+        states_prep, actions_prep, _, _, _ = self.preprocess(states=states, actions=actions)
 
         gen_actions = self.delta_policy(states_prep)
         with torch.no_grad():
@@ -223,9 +227,8 @@ class seqGMM(BaseAgent):
         for i in range(self.mode_K):
             dist = torch.cat([means, log_stds], dim=-1)
             values[:, i] = self.q_mode_nets[i](states, dist)
-        uncertainties = values.std(dim=1)
         means = values.mean(dim=1)
-        return means, uncertainties
+        return means
 
 
     def reset(self):
@@ -234,12 +237,10 @@ class seqGMM(BaseAgent):
     def mode_policy(self, state):
         means, log_stds, weights = self.policy(state)
         extended_states = state.unsqueeze(1).repeat(1, self.num_mixtures, 1)
-        scores, _ = self.compute_values(extended_states.reshape(-1, self.state_dim),
-                                        means.reshape(-1, self.ac_dim),
-                                        log_stds.reshape(-1, self.ac_dim))
-
+        scores = self.compute_values(extended_states.reshape(-1, self.state_dim),
+                                     means.reshape(-1, self.ac_dim),
+                                     log_stds.reshape(-1, self.ac_dim))
         scores = scores.reshape(-1, self.num_mixtures)
-        scores[weights < torch.quantile(weights, self.sample_quantile)] = -1000
         class_label = torch.argmax(scores, dim=1)
         loc = means[0, class_label]
         std = log_stds[0, class_label].exp()
@@ -248,8 +249,9 @@ class seqGMM(BaseAgent):
     @torch.no_grad()
     def get_action(self, state):
         state_prep, _, _, _, _ = self.preprocess(states=state[np.newaxis])
-        action = self.delta_policy(state_prep).cpu().numpy().squeeze()
+        #action = self.delta_policy(state_prep).cpu().numpy().squeeze()
         #action = self.policy.sample_action(state_prep).cpu().numpy().squeeze()
+        action = self.mode_policy(state_prep)[0].cpu().numpy().squeeze()
         clipped_action = np.clip(action, -1, 1)
         return clipped_action
 
@@ -261,26 +263,13 @@ class seqGMM(BaseAgent):
     @torch.no_grad()
     def identify_gmm_components(self, states_prep, actions_prep):
         means, log_stds, weights = self.policy(states_prep)
-
-        # Expand actions to match the shape of means and stds
         actions_expanded = actions_prep.unsqueeze(1).expand_as(means)
-
-        # Compute log probabilities for each Gaussian in the mixture
         stds = log_stds.exp()
         log_probs = self.log_prob_gaussian(actions_expanded, means, stds)
-
-        # Sum log probabilities over action dimensions
         log_probs = log_probs.sum(-1)  # shape: [batch_size, num_mixtures]
-
-        log_probs[weights < torch.quantile(weights, self.sample_quantile)] = -10000
-
-        # Find the index of the maximum log probability for each batch item
         most_likely_components = log_probs.argmax(dim=1)
-
-        # Gather the means and log_stds of the most likely components
         most_likely_means = means[torch.arange(means.size(0)), most_likely_components]
         most_likely_log_stds = log_stds[torch.arange(log_stds.size(0)), most_likely_components]
-
         return most_likely_means, most_likely_log_stds
 
 
