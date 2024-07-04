@@ -251,7 +251,7 @@ def mdn_loss(alpha, mu, sigma, y):
     loss = -torch.log(torch.sum(m, dim=1))
     return torch.mean(loss)
 
-'''
+
 def sample_from_mdn(model, x, n_samples=100):
     alpha, mu, sigma = model(x)
     alpha = alpha.detach().cpu().numpy()
@@ -295,7 +295,7 @@ def sample_from_mdn(model, x, n_samples=100):
             sample = np.random.normal(mu[i, idx], sigma[i, idx])
             samples.append([x[i].item(), sample])
     return np.array(samples)
-
+'''
 
 
 
@@ -322,52 +322,44 @@ data_x = torch.tensor(data[:, 0:1], dtype=torch.float32).to(device)
 data_y = torch.tensor(data[:, 1:], dtype=torch.float32).to(device)
 data_r = torch.tensor(rewards, dtype=torch.float32).unsqueeze(1).to(device)
 
+data_r = torch.zeros_like(data_r)
+'''
 # Train the Gaussian network
-model = train_gaussian_network(data_x, data_y, data_r, n_epochs=10000) # 1000
+model = train_gaussian_network(data_x, data_y, data_r, n_epochs=10000) # 10000
 # Sample actions from the trained policy
 sampled_actions = sample_from_gaussian_network(model, data_x, n_samples=10)
-'''
-cvae = train_cvae(data_x, data_y, data_r, latent_dim=10, n_epochs=50000) #10000
+
+cvae = train_cvae(data_x, data_y, data_r, latent_dim=10, n_epochs=50000) #50000
 samples_cvae = sample_from_cvae(cvae, data_x, n_samples=10)
 
-generator = train_cgan(data_x, data_y, data_r, n_epochs=200) # 20000
-samples_cgan = sample_from_cgan(generator, data_x, n_samples=1)
+generator = train_cgan(data_x, data_y, data_r, n_epochs=50000) # 20000
+samples_cgan = sample_from_cgan(generator, data_x, n_samples=10)
 
-mdn = train_mdn(data_x, data_y, n_mixtures=20, n_epochs=100) # 10000
+mdn = train_mdn(data_x, data_y, n_mixtures=20, n_epochs=10000) # 10000
 samples_mdn = sample_from_mdn(mdn, data_x, n_samples=20)
 '''
+cmap = 'Blues'
+
 # Plot the original data
 plt.figure(figsize=(8, 8))
-colors = ['blue', 'green']
+colors = ['blue', 'blue']
 for reward in np.unique(rewards):
     indices = rewards == reward
     plt.scatter(data[indices, 0], data[indices, 1], s=1, label=f'Reward {reward}', color=colors[reward])
-plt.title("Double Circle Data with Rewards", fontsize=20)
+plt.title("Double Circle Data without Rewards", fontsize=20)
 plt.xlabel("State", fontsize=16)
 plt.ylabel("Action", fontsize=16)
 plt.xlim(-1.6, 1.6)
 plt.ylim(-1.6, 1.6)
-plt.legend(fontsize=14)
+#plt.legend(fontsize=14)
 plt.grid(True)
 plt.show()
 
 # KDE plot of the sampled actions
 plt.figure(figsize=(8, 8))
-sns.kdeplot(x=sampled_actions[:, 0], y=sampled_actions[:, 1], cmap='Greens', 
+sns.kdeplot(x=sampled_actions[:, 0], y=sampled_actions[:, 1], cmap=cmap, 
             fill=True, bw_adjust=0.5, thresh=0.2)
-plt.title("Sampled Actions from Weighted Gaussian", fontsize=20)
-plt.xlabel("State", fontsize=16)
-plt.ylabel("Action", fontsize=16)
-plt.xlim(-1.6, 1.6)
-plt.ylim(-1.6, 1.6)
-plt.grid(True)
-plt.show()
-
-# KDE plot of the sampled actions
-plt.figure(figsize=(8, 8))
-sns.kdeplot(x=samples_cvae[:, 0], y=samples_cvae[:, 1], cmap='Greens', 
-            fill=True, bw_adjust=0.5, thresh=0.2)
-plt.title("Sampled Actions from Weighted CVAE", fontsize=20)
+plt.title("Sampled Actions from Gaussian", fontsize=20)
 plt.xlabel("State", fontsize=16)
 plt.ylabel("Action", fontsize=16)
 plt.xlim(-1.6, 1.6)
@@ -375,12 +367,11 @@ plt.ylim(-1.6, 1.6)
 plt.grid(True)
 plt.show()
 
-
 # KDE plot of the sampled actions
 plt.figure(figsize=(8, 8))
-sns.kdeplot(x=samples_cgan[:, 0], y=samples_cgan[:, 1], cmap='Greens', 
+sns.kdeplot(x=samples_cvae[:, 0], y=samples_cvae[:, 1], cmap=cmap, 
             fill=True, bw_adjust=0.5, thresh=0.2)
-plt.title("Sampled Actions from Weighted CGAN", fontsize=20)
+plt.title("Sampled Actions from CVAE", fontsize=20)
 plt.xlabel("State", fontsize=16)
 plt.ylabel("Action", fontsize=16)
 plt.xlim(-1.6, 1.6)
@@ -389,12 +380,25 @@ plt.grid(True)
 plt.show()
 
 
+# KDE plot of the sampled actions
+plt.figure(figsize=(8, 8))
+sns.kdeplot(x=samples_cgan[:, 0], y=samples_cgan[:, 1], cmap=cmap, 
+            fill=True, bw_adjust=0.5, thresh=0.2)
+plt.title("Sampled Actions from CGAN", fontsize=20)
+plt.xlabel("State", fontsize=16)
+plt.ylabel("Action", fontsize=16)
+plt.xlim(-1.6, 1.6)
+plt.ylim(-1.6, 1.6)
+plt.grid(True)
+plt.show()
+
+
 
 # KDE plot of the sampled actions
 plt.figure(figsize=(8, 8))
-sns.kdeplot(x=samples_mdn[:, 0], y=samples_mdn[:, 1], cmap='Greens', 
+sns.kdeplot(x=samples_mdn[:, 0], y=samples_mdn[:, 1], cmap=cmap, 
             fill=True, bw_adjust=0.5, thresh=0.2)
-plt.title("Sampled Actions from Q-MDN", fontsize=20)
+plt.title("Sampled Actions from MDN", fontsize=20)
 plt.xlabel("State", fontsize=16)
 plt.ylabel("Action", fontsize=16)
 plt.xlim(-1.6, 1.6)

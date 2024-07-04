@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 from agents.base_agent import BaseAgent
 from networks.networks import Qnetwork, Policy
@@ -85,7 +86,7 @@ class seqGMM(BaseAgent):
         GMM_info = {}
         GMM_info = self.train_GMM(batch_size=batch_size)
         delta_policy_info = {}#self.train_delta_policy(batch_size=batch_size)
-        mode_value_info = self.train_mode_value_function(batch_size=batch_size)
+        mode_value_info = {}#self.train_mode_value_function(batch_size=batch_size)
         value_info = {}#self.train_value_function(batch_size=batch_size)
         if self.training_steps % self.policy_delay == 0:
             self.update_target_nets([self.policy], [self.target_policy])
@@ -272,4 +273,32 @@ class seqGMM(BaseAgent):
         most_likely_log_stds = log_stds[torch.arange(log_stds.size(0)), most_likely_components]
         return most_likely_means, most_likely_log_stds
 
+    
+    def plot_gmm_weights_distribution(self, num_samples=1):
+            # Randomly sample states from the replay buffer
+            states, _, _, _, _ = self.replay_buffer.sample(num_samples)
+            
+            # Preprocess the states
+            states_prep, _, _, _, _ = self.preprocess(states=states)
+            
+            # Get GMM weights
+            _, _, weights = self.policy(states_prep)
+            
+            # Convert weights to numpy array
+            weights_np = weights.cpu().detach().numpy()
+            
+            # Sort weights for each state and calculate the average weights
+            sorted_weights = np.sort(weights_np, axis=1)[:, ::-1]
+            average_sorted_weights = np.mean(sorted_weights, axis=0)
+            
+            # Plot the bar chart for average sorted weights
+            plt.figure(figsize=(10, 6))
+            plt.bar(range(1, self.num_mixtures + 1), average_sorted_weights)
+            plt.xlabel('Gaussian Index')
+            plt.ylabel('Average Weight')
+            plt.title('Average Distribution of GMM Weights for Randomly Selected States')
+            plt.xticks(range(1, self.num_mixtures + 1))
+            plt.grid(True)
+            plt.show()
+    
 

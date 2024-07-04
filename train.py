@@ -15,15 +15,15 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='hopper-medium-v2')
-parser.add_argument('--agent', type=str, default='seqGMM')
+parser.add_argument('--env_name', type=str, default='halfcheetah-full-replay-v2')
+parser.add_argument('--agent', type=str, default='STR')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 parser.add_argument('--render', type=int, default=0)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
 parser.add_argument('--project', type=str, default='benchmark')
 parser.add_argument('--group', type=str, default='seqGMM')
 parser.add_argument('--training_steps', type=int, default=200000)
@@ -31,7 +31,7 @@ parser.add_argument('--eval_episodes', type=int, default=10)
 parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
 
-parser.add_argument('--num_mixtures', type=int, default=10)
+parser.add_argument('--num_mixtures', type=int, default=50)
 parser.add_argument('--sample_quantile', type=float, default=0)
 parser.add_argument('--save_gmm', type=int, default=1)
 

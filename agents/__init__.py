@@ -13,6 +13,9 @@ def return_agent(**agent_params):
     elif agent_params['agent'].startswith('AWR'):
         from agents.awr import AWR
         return AWR(**agent_params)
+    elif agent_params['agent'].startswith('WCGAN'):
+        from agents.wcgan import WCGAN
+        return WCGAN(**agent_params)
     elif agent_params['agent'].startswith('GMM'):
         from agents.gmm import GMM
         return GMM(**agent_params)
