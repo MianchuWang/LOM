@@ -15,8 +15,8 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='halfcheetah-full-replay-v2')
-parser.add_argument('--agent', type=str, default='STR')
+parser.add_argument('--env_name', type=str, default='halfcheetah-medium-replay-v2')
+parser.add_argument('--agent', type=str, default='LOM')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
 parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
@@ -31,8 +31,7 @@ parser.add_argument('--eval_episodes', type=int, default=10)
 parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
 
-parser.add_argument('--num_mixtures', type=int, default=50)
-parser.add_argument('--sample_quantile', type=float, default=0)
+parser.add_argument('--num_mixtures', type=int, default=5)
 parser.add_argument('--save_gmm', type=int, default=1)
 
 
@@ -112,8 +111,9 @@ for steps in tqdm(range(0, args.training_steps), mininterval=1):
     
     if args.enable_wandb:
         wandb.log({**training_info, **policy_eval_info})
-
+'''
 if args.save_gmm:
     torch.save(agent.policy.state_dict(), 'gmm_models/'+args.env_name+'.pth')
     torch.save([agent.q_mode_nets[i].state_dict() for i in range(agent.mode_K)], 
                'gmm_models/value_functions/'+args.env_name+'.pth')
+'''

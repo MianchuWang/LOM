@@ -19,8 +19,8 @@ def return_agent(**agent_params):
     elif agent_params['agent'].startswith('GMM'):
         from agents.gmm import GMM
         return GMM(**agent_params)
-    elif agent_params['agent'].startswith('seqGMM'):
-        from agents.seq_gmm import seqGMM
-        return seqGMM(**agent_params)
+    elif agent_params['agent'].startswith('LOM'):
+        from agents.lom import LOM
+        return LOM(**agent_params)
     else:
         raise Exception('Invalid agent!')
