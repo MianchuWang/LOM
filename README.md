@@ -1,6 +1,6 @@
-# Weighted Imitation Learning on One Mode (LOM)
+# One Mode Rules Them All: Weighted Imitation Learning on a Single Mode
 
-This is the repository for the paper *Exploiting Multi-modality in Offline Reinforcement Learning with Weighted Imitation Learning*.
+This is the repository for the paper *One Mode Rules Them All: Weighted Imitation Learning on a Single Mode*.
 
 Some part of the code to be organised.
 

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-envs=(
-'halfcheetah-medium-v2' 
+envs=('halfcheetah-medium-v2' 
 'hopper-medium-v2' 
 'walker2d-medium-v2' 
 'halfcheetah-medium-replay-v2' 
