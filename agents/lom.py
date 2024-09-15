@@ -72,6 +72,7 @@ class LOM(BaseAgent):
     def __init__(self, **agent_params):
         super().__init__(**agent_params)
         self.params = hyperparams[self.env_name]
+        self.params['num_mixtures'] = agent_params['num_mixtures']
         print(self.params)
         self.training_steps = 0
         self.policy_delay = 2
@@ -95,7 +96,7 @@ class LOM(BaseAgent):
         for _ in tqdm(range(200000)):
             self.train_GMM(batch_size=512)
 
-        torch.save(self.gmm.state_dict(), 'gmm_' + self.env_name + '.pth')
+        #torch.save(self.gmm.state_dict(), 'gmm_' + self.env_name + '.pth')
 
 
     def train_models(self, batch_size=512):

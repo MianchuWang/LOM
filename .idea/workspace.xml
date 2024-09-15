@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="680fc2c0-10a7-49b4-93d6-8fd846b63cd9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/agents/lom.py" beforeDir="false" afterPath="$PROJECT_DIR$/agents/lom.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/exps.sh" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/run_baselines.sh" beforeDir="false" afterPath="$PROJECT_DIR$/run_baselines.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
     </list>
@@ -32,20 +30,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RdControllerToolWindowsLayoutState" isNewUi="true">
     <layout>
       <window_info id="Space Code Reviews" />
@@ -54,7 +52,7 @@
       <window_info id="Commit_Guest" />
       <window_info id="Pull Requests" />
       <window_info id="Learn" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16764322" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16894531" />
       <window_info id="Commit" order="1" weight="0.25" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -65,7 +63,7 @@
       <window_info anchor="bottom" id="Python Console" />
       <window_info anchor="bottom" id="Version Control" order="0" />
       <window_info anchor="bottom" id="Problems View" order="1" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.2518204" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="2" visible="true" weight="0.34041262" />
       <window_info anchor="bottom" id="Services" order="3" />
       <window_info anchor="right" id="Endpoints" />
       <window_info anchor="right" id="SciView" />
@@ -87,7 +85,8 @@
       <workItem from="1710288376853" duration="19353000" />
       <workItem from="1715902438974" duration="8062000" />
       <workItem from="1725405666135" duration="7197000" />
-      <workItem from="1725995236265" duration="42090000" />
+      <workItem from="1725995236265" duration="42428000" />
+      <workItem from="1726179363312" duration="2071000" />
     </task>
     <servers />
   </component>
