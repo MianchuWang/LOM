@@ -208,32 +208,6 @@ class LOM(BaseAgent):
         return {'policy/loss': policy_loss.item(),
                 'policy/weights': weights.mean().item()}
 
-    '''
-    
-    def train_policy(self, batch_size):
-        states, actions, rewards, next_states, terminals  = self.replay_buffer.sample(batch_size)
-        states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = \
-            self.preprocess(states=states, actions=actions, rewards=rewards, next_states=next_states, terminals=terminals)
-        
-        gen_dist, gen_actions = self.policy(states_prep)
-        with torch.no_grad():
-            # The exponential-advantage weight
-            q_values = self.q_nets[0](states_prep, actions_prep)
-            curr_q_values = self.q_nets[0](states_prep, gen_actions)
-            advs = q_values - curr_q_values
-            weights_exp = torch.clip(torch.exp(2 * advs), None, 100).squeeze()
-            
-            weights = weights_exp
-        
-        policy_loss = ((gen_actions - actions_prep).pow(2).mean(dim=1) * weights).mean()
-        
-        self.policy_opt.zero_grad()
-        policy_loss.backward()
-        self.policy_opt.step()
-        
-        return {'policy/loss': policy_loss.item(),
-                'policy/weights': weights.mean().item()}
-    '''
     
     def train_GMM(self, batch_size):
         states, actions, _, _, _ = self.replay_buffer.sample(batch_size)

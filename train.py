@@ -15,7 +15,7 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='halfcheetah-medium-expert-v2')
+parser.add_argument('--env_name', type=str, default='halfcheetah-full-replay-v2')
 parser.add_argument('--agent', type=str, default='LOM')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
@@ -110,9 +110,3 @@ for steps in tqdm(range(0, args.training_steps), mininterval=5):
     
     if args.enable_wandb:
         wandb.log({**training_info, **policy_eval_info})
-'''
-if args.save_gmm:
-    torch.save(agent.policy.state_dict(), 'gmm_models/'+args.env_name+'.pth')
-    torch.save([agent.q_mode_nets[i].state_dict() for i in range(agent.mode_K)], 
-               'gmm_models/value_functions/'+args.env_name+'.pth')
-'''
