@@ -15,7 +15,7 @@ import logger
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--env_name', type=str, default='halfcheetah-medium-v2')
+parser.add_argument('--env_name', type=str, default='halfcheetah-full-replay-v2')
 parser.add_argument('--agent', type=str, default='LOM')
 parser.add_argument('--buffer_capacity', type=int, default=2000000)
 parser.add_argument('--discount', type=float, default=0.99)
