@@ -11,18 +11,6 @@ from networks.networks import Qnetwork, Policy
 hyperparams = {'halfcheetah-medium-replay-v2': {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
                'hopper-medium-replay-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
                'walker2d-medium-replay-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
-               
-               'halfcheetah-medium-v2': {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
-               'hopper-medium-v2': {'K': 3, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0, 'smooth_noise': 0.2, 'C': 50},
-               'walker2d-medium-v2': {'K': 3, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0, 'smooth_noise': 0.2, 'C': 50},
-               
-               'halfcheetah-expert-v2': {'K': 1, 'num_mixtures': 1, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
-               'hopper-expert-v2': {'K': 1, 'num_mixtures': 1, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
-               'walker2d-expert-v2': {'K': 1, 'num_mixtures': 1, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
-
-               'halfcheetah-medium-expert-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
-               'hopper-medium-expert-v2': {'K': 4, 'num_mixtures': 1, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
-               'walker2d-medium-expert-v2': {'K': 4, 'num_mixtures': 1, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
 
                'halfcheetah-full-replay-v2': {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
                'hopper-full-replay-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
@@ -71,7 +59,12 @@ class MixtureGaussianPolicy(nn.Module):
 class LOM(BaseAgent):
     def __init__(self, **agent_params):
         super().__init__(**agent_params)
-        self.params = hyperparams[self.env_name]
+        try:
+            self.params = hyperparams[self.env_name]
+        except KeyError:
+            raise NotImplementedError(f"The hyperparameters for '{self.env_name}' will be made available upon acceptance. " + 
+                                      "The current version supports only the full-replay and medium-replay datasets.")
+        
         self.params['num_mixtures'] = agent_params['num_mixtures']
         print(self.params)
         self.training_steps = 0
