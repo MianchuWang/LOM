@@ -65,7 +65,6 @@ class LOM(BaseAgent):
             raise NotImplementedError(f"The hyperparameters for '{self.env_name}' will be made available upon acceptance. " + 
                                       "The current version supports only the full-replay and medium-replay datasets.")
         
-        self.params['num_mixtures'] = agent_params['num_mixtures']
         print(self.params)
         self.training_steps = 0
         self.policy_delay = 2
@@ -212,8 +211,8 @@ class LOM(BaseAgent):
         log_probs = m.log_prob(actions_prep.unsqueeze(1).expand_as(means))
         log_probs = log_probs.sum(-1)
 
-        #weighted_log_probs = log_probs + torch.log(weights)
-        weighted_log_probs = torch.logsumexp(log_probs + torch.log(weights), dim=-1)
+        weighted_log_probs = log_probs + torch.log(weights)
+        #weighted_log_probs = torch.logsumexp(log_probs + torch.log(weights), dim=-1)
         
         gmm_loss = - weighted_log_probs.mean()
 
