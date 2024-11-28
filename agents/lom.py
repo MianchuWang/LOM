@@ -59,12 +59,7 @@ class MixtureGaussianPolicy(nn.Module):
 class LOM(BaseAgent):
     def __init__(self, **agent_params):
         super().__init__(**agent_params)
-        try:
-            self.params = hyperparams[self.env_name]
-        except KeyError:
-            raise NotImplementedError(f"The hyperparameters for '{self.env_name}' will be made available upon acceptance. " + 
-                                      "The current version supports only the full-replay and medium-replay datasets.")
-        
+        self.params = hyperparams[self.env_name]
         print(self.params)
         self.training_steps = 0
         self.policy_delay = 2
