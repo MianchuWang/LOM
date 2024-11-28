@@ -23,7 +23,7 @@ parser.add_argument('--normalise', type=int, choices=[0, 1], default=1)
 parser.add_argument('--seed', type=int, default=-1)
 parser.add_argument('--render', type=int, default=0)
 
-parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=0)
+parser.add_argument('--enable_wandb', type=int, choices=[0, 1], default=1)
 parser.add_argument('--project', type=str, default='LOM')
 parser.add_argument('--group', type=str, default='')
 parser.add_argument('--training_steps', type=int, default=500000)
