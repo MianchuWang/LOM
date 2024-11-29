@@ -8,13 +8,25 @@ import torch.nn.functional as F
 from agents.base_agent import BaseAgent
 from networks.networks import Qnetwork, Policy
 
-hyperparams = {'halfcheetah-medium-replay-v2': {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
-               'hopper-medium-replay-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
-               'walker2d-medium-replay-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
-
-               'halfcheetah-full-replay-v2': {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
-               'hopper-full-replay-v2': {'K': 2, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
-               'walker2d-full-replay-v2': {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
+hyperparams = {'halfcheetah-medium-replay-v2':  {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
+               'hopper-medium-replay-v2':       {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
+               'walker2d-medium-replay-v2':     {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
+               
+               'halfcheetah-full-replay-v2':    {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
+               'hopper-full-replay-v2':         {'K': 2, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
+               'walker2d-full-replay-v2':       {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
+               
+               'halfcheetah-medium-v2':         {'K': 1, 'num_mixtures': 2, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
+               'hopper-medium-v2':              {'K': 3, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0, 'smooth_noise': 0.2, 'C': 50},
+               'walker2d-medium-v2':            {'K': 1, 'num_mixtures': 2, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
+               
+               'halfcheetah-medium-expert-v2':  {'K': 2, 'num_mixtures': 1, 'beta': 0.1, 'ac_rand': 0, 'smooth_noise': 0.0, 'C': 50},
+               'hopper-medium-expert-v2':       {'K': 3, 'num_mixtures': 2, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
+               'walker2d-medium-expert-v2':     {'K': 3, 'num_mixtures': 5, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
+               
+               'halfcheetah-expert-v2':         {'K': 1, 'num_mixtures': 2, 'beta': 0.1, 'ac_rand': 0.0, 'smooth_noise': 0.0, 'C': 50},
+               'hopper-expert-v2':              {'K': 1, 'num_mixtures': 2, 'beta': 0.1, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},  
+               'walker2d-expert-v2':            {'K': 1, 'num_mixtures': 5, 'beta': 0.1, 'ac_rand': 0.2, 'smooth_noise': 0.0, 'C': 50},
                }
 
 
@@ -30,7 +42,10 @@ class MixtureGaussianPolicy(nn.Module):
                                    nn.Linear(512, 512),
                                    nn.ReLU(),
                                    nn.Linear(512, action_dim * num_mixtures * 2 + num_mixtures))
-        
+    
+    
+    # -------------------------------------------------------------------------
+    # Return the means, log_stds, weights for each Gaussian components.
     def forward(self, state):
         x = self.model(state)
         an = self.action_dim * self.num_mixtures
@@ -40,18 +55,34 @@ class MixtureGaussianPolicy(nn.Module):
         weights = F.softmax(x[:, 2*an: ], dim=-1)
         return means, log_stds, weights
     
+    
+    
+    # -------------------------------------------------------------------------
+    # MW: This function can be removed.
+    '''
     def sample_action(self, state):
         means, log_stds, weights = self.forward(state)
         max_weight_indices = torch.argmax(weights, dim=-1)
         chosen_means = means[torch.arange(means.size(0)), max_weight_indices]
         return chosen_means
+    '''
     
-    def sample_actions_for_components(self, state, num_components):
+    
+    # -------------------------------------------------------------------------
+    '''
+        This function samples actions from all Gaussian components.
+        Input: Tensor state
+        Output: Samples with shape (batch_size, num_mixtures, ac_dim)
+    '''
+    def sample_actions_for_components(self, state):
+       # MW: mean (bs, num_mixture, ac_dim); log_stds (bs, num_mixture, ac_dim)
        means, log_stds, _ = self.forward(state)
        stds = (log_stds.clamp(-15, 0)).exp()
        dist = torch.distributions.Normal(means, stds)
+       # MW: samples (128, 10, 3)
        samples = dist.sample()
-       samples = samples.reshape(state.shape[0], num_components, self.action_dim)
+       # MW: This line is redundant, removed.
+       #samples = samples.reshape(state.shape[0], self.num_mixtures, self.action_dim)
        return samples
 
 
@@ -79,12 +110,13 @@ class LOM(BaseAgent):
             self.q_target_nets.append(Qnetwork(self.state_dim, self.ac_dim).to(device=self.device))
             self.q_target_nets[k].load_state_dict(self.q_nets[k].state_dict())
             self.q_net_opts.append(torch.optim.Adam(self.q_nets[k].parameters(), lr=3e-4))  
+        
         print('Learning the GMM model ...')
         for _ in tqdm(range(200000)):
             self.train_GMM(batch_size=512)
 
-        #torch.save(self.gmm.state_dict(), 'gmm_' + self.env_name + '.pth')
-
+        torch.save(self.gmm.state_dict(), 'gmm_' + self.env_name + '.pth')
+        
 
     def train_models(self, batch_size=512):
         self.value_info = self.train_value_function(batch_size=256)
@@ -95,7 +127,11 @@ class LOM(BaseAgent):
         self.training_steps += 1
         return {**self.value_info, **self.policy_info, **self.mode_info}
     
-    
+    # -------------------------------------------------------------------------
+    # MW: Check finished.
+    '''
+        Follow the TD3-BC manner to learn a Q-function conditioned on the behaviour policy
+    '''
     def train_value_function(self, batch_size):
         states, actions, rewards, next_states, next_actions, terminals  = self.replay_buffer.sample_with_next_action(batch_size)
         states_prep, actions_prep, rewards_prep, next_states_prep, terminals_prep = \
@@ -103,7 +139,8 @@ class LOM(BaseAgent):
         _, next_actions_prep, _, _, _ = self.preprocess(actions=next_actions)
         
         with torch.no_grad():
-            target_actions = self.get_mode_actions(states_prep)
+            # MW: this line is redundant, but does not influence the result.
+            # target_actions = self.get_mode_actions(states_prep) 
             target_actions = next_actions_prep
             smooth_noise = torch.clamp(self.params['smooth_noise'] * torch.randn_like(target_actions), -0.5, 0.5)
             target_actions = torch.clamp(target_actions + smooth_noise, -1, 1)
@@ -125,23 +162,31 @@ class LOM(BaseAgent):
                 'Q/pred_value': pred_q_value.mean().item(), 
                 'Q/target_value': target_q_value.mean().item()}
 
-    
+    # -------------------------------------------------------------------------
+    # MW: check finished.
     def train_mode_function(self, batch_size):
         states, _, _, _, _, _ = self.replay_buffer.sample_with_next_action(batch_size)
         states_prep, _, _, _, _ = self.preprocess(states=states)
 
         with torch.no_grad():
+            # Create a one-hot encoding for each mixture component for every state in the batch.
             one_hot_components = torch.eye(self.params['num_mixtures']).to(self.device)  # [num_mixtures, num_mixtures]
             one_hot_components = one_hot_components.unsqueeze(0).repeat(batch_size, 1, 1)  # [batch_size, num_mixtures, num_mixtures]
             one_hot_components = one_hot_components.reshape(-1, self.params['num_mixtures'])  # [batch_size * num_mixtures, num_mixtures]
-    
+            
+            # Create multiple copies of each state, one for each mixture component.
             extended_states = states_prep.unsqueeze(1).repeat(1, self.params['num_mixtures'], 1)
-            extended_actions = self.gmm.sample_actions_for_components(states_prep, self.params['num_mixtures'])
+            
+            # Sample an action from each mixture component for each state.
+            # extended_actions = self.gmm.sample_actions_for_components(states_prep, self.params['num_mixtures'])
+            # MW: Previous version has a redundant parameter.
+            extended_actions = self.gmm.sample_actions_for_components(states_prep)
             
             flat_states = extended_states.reshape(-1, extended_states.shape[-1])
             flat_actions = extended_actions.reshape(-1, extended_actions.shape[-1])
             q_values = self.q_nets[0](flat_states, flat_actions)
-
+        
+        # MW: the state and the component are paried.
         mode_predictions = self.mode_net(flat_states, one_hot_components)
         mode_loss = F.mse_loss(mode_predictions, q_values, reduction='mean')
 
@@ -151,15 +196,16 @@ class LOM(BaseAgent):
     
         return {'mode_function/mode_loss': mode_loss.item()}
     
-    
+    # -------------------------------------------------------------------------
+    # MW: check finished.
     def get_mode_actions(self, states_prep):
         batch_size = states_prep.shape[0]
-        # Prepare one-hot encodings for each mixture component
+        # Create a one-hot encoding for each mixture component for every state in the batch.
         one_hot_components = torch.eye(self.params['num_mixtures']).to(self.device)  # [num_mixtures, num_mixtures]
         one_hot_components = one_hot_components.unsqueeze(0).repeat(batch_size, 1, 1)  # [batch_size, num_mixtures, num_mixtures]
         one_hot_components = one_hot_components.reshape(-1, self.params['num_mixtures'])  # [batch_size * num_mixtures, num_mixtures]
     
-        # Extend states for each mixture component
+        # Create multiple copies of each state, one for each mixture component.
         extended_states = states_prep.unsqueeze(1).repeat(1, self.params['num_mixtures'], 1)
         extended_states = extended_states.reshape(-1, extended_states.shape[-1])  # [batch_size * num_mixtures, state_dim]
     
@@ -175,6 +221,8 @@ class LOM(BaseAgent):
         actions = m.sample()
         return torch.clip(actions, -1, 1)
     
+    # -------------------------------------------------------------------------
+    # MW: check finished.
     def train_policy(self, batch_size):
         states, _, _, _, _ = self.replay_buffer.sample(batch_size)
         states_prep, _, _, _, _ = self.preprocess(states=states)
@@ -195,19 +243,20 @@ class LOM(BaseAgent):
         return {'policy/loss': policy_loss.item(),
                 'policy/weights': weights.mean().item()}
 
-    
+    # -------------------------------------------------------------------------
+    # MW: Check finished.
     def train_GMM(self, batch_size):
         states, actions, _, _, _ = self.replay_buffer.sample(batch_size)
         states_prep, actions_prep, _, _, _ = self.preprocess(states=states, actions=actions)
         
         means, log_stds, weights = self.gmm(states_prep)
-        stds = (log_stds.clamp(-15, 0)).exp() # stds = log_stds.exp()
+        stds = (log_stds.clamp(-15, 0)).exp()
         m = torch.distributions.Normal(means, stds)
         log_probs = m.log_prob(actions_prep.unsqueeze(1).expand_as(means))
         log_probs = log_probs.sum(-1)
 
-        weighted_log_probs = log_probs + torch.log(weights)
-        #weighted_log_probs = torch.logsumexp(log_probs + torch.log(weights), dim=-1)
+        #weighted_log_probs = log_probs + torch.log(weights) # MW: mistake found by Reviewer 4
+        weighted_log_probs = torch.logsumexp(log_probs + torch.log(weights), dim=-1)
         
         gmm_loss = - weighted_log_probs.mean()
 
