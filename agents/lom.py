@@ -12,7 +12,7 @@ hyperparams = {'halfcheetah-medium-replay-v2':  {'K': 1, 'num_mixtures': 5, 'bet
                'hopper-medium-replay-v2':       {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
                'walker2d-medium-replay-v2':     {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
                
-               'halfcheetah-full-replay-v2':    {'K': 1, 'num_mixtures': 5, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
+               'halfcheetah-full-replay-v2':    {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.4, 'smooth_noise': 0.2, 'C': 100},
                'hopper-full-replay-v2':         {'K': 2, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
                'walker2d-full-replay-v2':       {'K': 1, 'num_mixtures': 10, 'beta': 5, 'ac_rand': 0.0, 'smooth_noise': 0.2, 'C': 50},
                
