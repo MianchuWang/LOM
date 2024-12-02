@@ -221,7 +221,7 @@ class LOM(BaseAgent):
         log_probs = m.log_prob(actions_prep.unsqueeze(1).expand_as(means))
         log_probs = log_probs.sum(-1)
 
-        weighted_log_probs = torch.logsumexp(log_probs + torch.log(weights), dim=-1)
+        weighted_log_probs = torch.logsumexp(log_probs + torch.log(weights + 1e-8), dim=-1)
         gmm_loss = - weighted_log_probs.mean()
 
         self.gmm_opt.zero_grad()
