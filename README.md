@@ -22,7 +22,7 @@ To track the running logs with wandb, please use
 ```
 $ python train.py --env_name HalfCheetah-full-replay-v2 --enable_wandb 1
 ```
-To run replicate the results, please use
+To replicate the results, please use
 ```
 $ bash run_baselines.sh
 ```
