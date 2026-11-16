@@ -27,6 +27,84 @@ To replicate the results, please use
 $ bash run_baselines.sh
 ```
 
+## Top-k GNN extension
+
+This branch adds an experimental mode-selection extension while preserving the
+original LOM algorithm as the default. The three comparable configurations are:
+
+| `--mode_selection` | Selection rule |
+| --- | --- |
+| `top1` | Original LOM: choose the highest Hyper-Q component. |
+| `topk_q` | Keep the Hyper-Q top-k and rerank them using Monte Carlo estimates from the learned Q-function. |
+| `topk_gnn` | Keep the Hyper-Q top-k and rerank them with a learned graph network. |
+
+The existing `K` hyperparameter still means the number of Q-networks. The new
+`--top_k` argument controls the number of Gaussian modes and defaults to 3.
+
+### Architecture and objective
+
+For every state, the GMM produces all Gaussian components and the existing mode
+network supplies their Hyper-Q scores. The selected top-k components become a
+fully connected graph. Each node contains its Gaussian mean, standard deviation,
+mixing coefficient, and original Hyper-Q score. Euclidean distances between
+component means are edge features. Two PyTorch-native message-passing layers
+produce one refined score per node; no graph library or new dependency is used.
+
+The GNN target is a detached Monte Carlo estimate of the learned Q-value for each
+selected Gaussian. Targets are normalized within each state. Training combines
+Smooth L1 regression with a pairwise ranking loss (weighted by
+`--gnn_ranking_weight`). Gradients update only the GNN in this step: the GMM,
+Q-network, and original mode network retain their existing, separate training
+objectives. This target makes the extension experimentally testable but is not
+independent evidence that it improves returns.
+
+### Commands
+
+The original baseline remains the default:
+
+```bash
+python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection top1
+```
+
+Run the two extensions with:
+
+```bash
+python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_q --top_k 3
+python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_gnn --top_k 3
+```
+
+GMM pretraining is still 200,000 steps by default. It can be reused or shortened
+for smoke tests:
+
+```bash
+python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_gnn \
+  --gmm_checkpoint gmm_halfcheetah-medium-replay-v2.pth
+python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_gnn \
+  --gmm_pretrain_steps 10 --training_steps 10 --eval_every 10 --save_gmm 0
+```
+
+Run unit and GNN sanity tests with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+For the full three-seed comparison, run `bash run_topk_experiments.sh`. Override
+the defaults with `ENV_NAME=...` and `SEEDS="..."`. Use identical datasets,
+training steps, evaluation intervals, and seeds across all three configurations.
+Record episodic return, normalized score, variance across seeds, wall-clock time,
+and computational overhead. Per-update timings are logged under `time/*`; compare
+`time/train_step_seconds` across configurations and use `time/gnn_step_seconds`
+to isolate the graph update.
+
+### Current limitations
+
+No benchmark result is reported yet. The GNN target depends on the learned
+Q-function and can inherit its estimation error. The top-k Q baseline adds
+sampling cost during policy training, and the graph method adds a GNN update.
+Results should therefore be treated as an ablation study, not a demonstrated
+improvement, until controlled D4RL experiments are completed.
+
 ## Reference
 
 If you find our research helpful, please cite our paper at ICLR 2025:

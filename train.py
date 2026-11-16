@@ -31,17 +31,29 @@ parser.add_argument('--eval_episodes', type=int, default=10)
 parser.add_argument('--eval_every', type=int, default=10000)
 parser.add_argument('--log_path', type=str, default='./experiments/')
 parser.add_argument('--save_gmm', type=int, default=1)
+parser.add_argument('--gmm_pretrain_steps', type=int, default=200000)
+parser.add_argument('--gmm_batch_size', type=int, default=512)
+parser.add_argument('--gmm_checkpoint', type=str, default='')
+
+parser.add_argument('--mode_selection', type=str,
+                    choices=['top1', 'topk_q', 'topk_gnn'], default='top1')
+parser.add_argument('--top_k', type=int, default=3)
+parser.add_argument('--mode_action_samples', type=int, default=8)
+parser.add_argument('--gnn_hidden_dim', type=int, default=128)
+parser.add_argument('--gnn_lr', type=float, default=3e-4)
+parser.add_argument('--gnn_ranking_weight', type=float, default=0.25)
 
 
 args = parser.parse_args()
 args.seed = np.random.randint(1e3) if args.seed == -1 else args.seed
-args.group = args.env_name + '_' + args.agent
+args.group = args.group or args.env_name + '_' + args.agent + '_' + args.mode_selection
 
 args_dict = vars(args)
 
 if args.enable_wandb:
-    group = 'LOM_{}'.format(args.env_name)
-    wandb.init(project=args.project, config=args, group=group, name='{}_{}_seed{}'.format(args.agent, args.env_name, args.seed))
+    wandb.init(project=args.project, config=args, group=args.group,
+               name='{}_{}_{}_seed{}'.format(
+                   args.agent, args.env_name, args.mode_selection, args.seed))
 experiments_dir = args.log_path + args.project + '/' + args.group + '/' + '{}_{}_seed{}'.format(args.agent, args.env_name, args.seed) + '/'
 logger.configure(experiments_dir)
 logger.log('This running starts with parameters:')
@@ -86,11 +98,13 @@ def eval_policy(env, agent, render=False):
 
 
 epoch = 0
+interval_start = time.time()
 for steps in tqdm(range(0, args.training_steps), mininterval=5):
-    t_start = time.time()
+    step_start = time.time()
     
     policy_eval_info = {}
     training_info = agent.train_models()
+    training_info['time/train_step_seconds'] = time.time() - step_start
     
     if (steps + 1) % args.eval_every == 0:
         policy_eval_info = eval_policy(env, agent, args.render)
@@ -99,13 +113,15 @@ for steps in tqdm(range(0, args.training_steps), mininterval=5):
         epoch += 1
         logger.record_tabular('total steps', steps)
         logger.record_tabular('training epoch', epoch)
-        logger.record_tabular('epoch time (min)', (time.time() - t_start)/60)
+        logger.record_tabular('epoch time (min)',
+                              (time.time() - interval_start) / 60)
         for key, val in log_info.items():
             if type(val) == torch.Tensor:
                 logger.record_tabular(key, val.mean().item())
             else:
                 logger.record_tabular(key, val)
         logger.dump_tabular()
+        interval_start = time.time()
     
     if args.enable_wandb:
         wandb.log({**training_info, **policy_eval_info})
