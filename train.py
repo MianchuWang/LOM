@@ -2,10 +2,8 @@ import argparse
 import random
 import torch
 import numpy as np
-import wandb
 import os
 import time
-import d4rl
 from tqdm import tqdm
 
 from replay_buffer import ReplayBuffer
@@ -51,6 +49,14 @@ args.group = args.group or args.env_name + '_' + args.agent + '_' + args.mode_se
 args_dict = vars(args)
 
 if args.enable_wandb:
+    try:
+        import wandb
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            'Weights & Biases logging is enabled, but wandb is not installed. '
+            'Install it with "python -m pip install wandb" or rerun with '
+            '--enable_wandb 0.'
+        ) from exc
     wandb.init(project=args.project, config=args, group=args.group,
                name='{}_{}_{}_seed{}'.format(
                    args.agent, args.env_name, args.mode_selection, args.seed))
@@ -74,6 +80,14 @@ buffer = ReplayBuffer(buffer_size=args.buffer_capacity,
                       state_dim=env_info['state_dim'], 
                       ac_dim=env_info['ac_dim'], discount=args.discount)
 if args.env_name in mujoco_locomotion:
+    try:
+        import d4rl
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            'D4RL is required for MuJoCo locomotion environments. '
+            'Install d4rl, gym, and mujoco-py in the Python 3.9 environment '
+            'specified by the README.'
+        ) from exc
     buffer.load_dataset(d4rl.qlearning_dataset(env))
 agent = return_agent(replay_buffer=buffer, state_dim=env_info['state_dim'], 
                      ac_dim=env_info['ac_dim'], device=device,  **args_dict)

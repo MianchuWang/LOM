@@ -1,6 +1,5 @@
 import numpy as np
 import joblib
-import d4rl
 import warnings
 
 class ReplayBuffer:

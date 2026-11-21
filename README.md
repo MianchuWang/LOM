@@ -12,15 +12,19 @@ This is the official code repository for the paper *Learning on One Mode: Addres
 * mujoco-py = 2.1.2.14
 * pytorch = 2.3.0+cu121
 
+The MuJoCo/D4RL stack is legacy software and is most reliable on Linux or
+WSL2 with Python 3.9. `wandb` is optional and is only required when using
+`--enable_wandb 1`.
+
 ## Usage
 
 Run the following code to train the LOM agent on HalfCheetah-full-replay-v2:
 ```
-$ python train.py --env_name HalfCheetah-full-replay-v2
+$ python train.py --env_name halfcheetah-full-replay-v2
 ```
 To track the running logs with wandb, please use
 ```
-$ python train.py --env_name HalfCheetah-full-replay-v2 --enable_wandb 1
+$ python train.py --env_name halfcheetah-full-replay-v2 --enable_wandb 1
 ```
 To replicate the results, please use
 ```
