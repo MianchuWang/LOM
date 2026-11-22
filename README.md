@@ -41,6 +41,7 @@ original LOM algorithm as the default. The three comparable configurations are:
 | `top1` | Original LOM: choose the highest Hyper-Q component. |
 | `topk_q` | Keep the Hyper-Q top-k and rerank them using Monte Carlo estimates from the learned Q-function. |
 | `topk_gnn` | Keep the Hyper-Q top-k and rerank them with a learned graph network. |
+| `topk_gnn_merge` | Keep the Hyper-Q top-k and sample from a GNN-weighted mixture of them. |
 
 The existing `K` hyperparameter still means the number of Q-networks. The new
 `--top_k` argument controls the number of Gaussian modes and defaults to 3.
@@ -62,6 +63,14 @@ Q-network, and original mode network retain their existing, separate training
 objectives. This target makes the extension experimentally testable but is not
 independent evidence that it improves returns.
 
+In `topk_gnn_merge`, the GNN scores are converted into normalized mixture weights
+and combined with the selected GMM weights. Action generation samples a component
+from this categorical distribution and then samples from that component's Gaussian.
+The component means are not averaged, which preserves distinct action modes. The
+`--gnn_temperature` and `--gnn_prior_weight` arguments control score sharpness and
+the influence of the original GMM weights. Merge entropy, maximum merge weight,
+and effective mode count are logged under `gnn/*`.
+
 ### Commands
 
 The original baseline remains the default:
@@ -75,6 +84,7 @@ Run the two extensions with:
 ```bash
 python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_q --top_k 3
 python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_gnn --top_k 3
+python train.py --env_name halfcheetah-medium-replay-v2 --mode_selection topk_gnn_merge --top_k 3
 ```
 
 GMM pretraining is still 200,000 steps by default. It can be reused or shortened

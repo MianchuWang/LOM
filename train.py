@@ -34,12 +34,14 @@ parser.add_argument('--gmm_batch_size', type=int, default=512)
 parser.add_argument('--gmm_checkpoint', type=str, default='')
 
 parser.add_argument('--mode_selection', type=str,
-                    choices=['top1', 'topk_q', 'topk_gnn'], default='top1')
+                    choices=['top1', 'topk_q', 'topk_gnn', 'topk_gnn_merge'], default='top1')
 parser.add_argument('--top_k', type=int, default=3)
 parser.add_argument('--mode_action_samples', type=int, default=8)
 parser.add_argument('--gnn_hidden_dim', type=int, default=128)
 parser.add_argument('--gnn_lr', type=float, default=3e-4)
 parser.add_argument('--gnn_ranking_weight', type=float, default=0.25)
+parser.add_argument('--gnn_temperature', type=float, default=1.0)
+parser.add_argument('--gnn_prior_weight', type=float, default=1.0)
 
 
 args = parser.parse_args()

@@ -76,6 +76,8 @@ class LOM(BaseAgent):
         self.mode_selection = agent_params.get('mode_selection', 'top1')
         self.top_k = agent_params.get('top_k', 3)
         self.mode_action_samples = agent_params.get('mode_action_samples', 8)
+        self.gnn_temperature = agent_params.get('gnn_temperature', 1.0)
+        self.gnn_prior_weight = agent_params.get('gnn_prior_weight', 1.0)
         if self.top_k < 1:
             raise ValueError('top_k must be at least 1')
         if (self.mode_selection != 'top1' and
@@ -85,6 +87,10 @@ class LOM(BaseAgent):
                     self.top_k, self.params['num_mixtures']))
         if self.mode_action_samples < 1:
             raise ValueError('mode_action_samples must be at least 1')
+        if self.gnn_temperature <= 0:
+            raise ValueError('gnn_temperature must be positive')
+        if self.gnn_prior_weight < 0:
+            raise ValueError('gnn_prior_weight must be non-negative')
         print(self.params)
         self.training_steps = 0
         self.policy_delay = 2
@@ -136,7 +142,7 @@ class LOM(BaseAgent):
         mode_start = time.perf_counter()
         self.mode_info = self.train_mode_function(batch_size=1024)
         mode_seconds = time.perf_counter() - mode_start
-        if self.mode_selection == 'topk_gnn':
+        if self.mode_selection in ('topk_gnn', 'topk_gnn_merge'):
             gnn_start = time.perf_counter()
             self.gnn_info = self.train_mode_gnn(batch_size=256)
             gnn_seconds = time.perf_counter() - gnn_start
@@ -302,8 +308,44 @@ class LOM(BaseAgent):
             'gnn/ranking_loss': ranking_loss.item(),
         }
 
+    def _gnn_merge_weights(self, modes):
+        """Turn GNN quality scores and GMM priors into mixture weights."""
+        gnn_scores = self.mode_gnn(
+            self._mode_node_features(modes), modes['means'])
+        prior = modes['weights'].clamp_min(1e-8)
+        logits = gnn_scores / self.gnn_temperature
+        weights = torch.softmax(logits, dim=1) * prior.pow(self.gnn_prior_weight)
+        return weights / weights.sum(dim=1, keepdim=True).clamp_min(1e-8)
+
+    def _sample_merged_mode_actions(self, modes, merge_weights):
+        """Sample one component and then one action from its Gaussian.
+
+        Sampling a component preserves separated action modes. Averaging the
+        component means would create an action that may belong to neither mode.
+        """
+        component = torch.distributions.Categorical(probs=merge_weights).sample()
+        batch_indices = torch.arange(
+            modes['means'].shape[0], device=self.device)
+        selected_means = modes['means'][batch_indices, component]
+        selected_stds = modes['stds'][batch_indices, component]
+        return torch.clamp(
+            torch.distributions.Normal(selected_means, selected_stds).sample(),
+            -1, 1)
+
+    @staticmethod
+    def _merge_diagnostics(merge_weights):
+        entropy = -(
+            merge_weights * merge_weights.clamp_min(1e-8).log()
+        ).sum(dim=1)
+        return {
+            'gnn/merge_entropy': entropy.mean().item(),
+            'gnn/max_merge_weight': merge_weights.max(dim=1).values.mean().item(),
+            'gnn/effective_modes': entropy.exp().mean().item(),
+        }
+
     def get_mode_actions(self, states_prep):
         batch_size = states_prep.shape[0]
+        self.last_merge_diagnostics = {}
         if self.mode_selection == 'top1':
             mode_values = self.get_mode_scores(states_prep)
             selected_indices = torch.argmax(mode_values, dim=1)
@@ -321,6 +363,12 @@ class LOM(BaseAgent):
                 with torch.no_grad():
                     refined_scores = self.mode_gnn(
                         self._mode_node_features(modes), modes['means'])
+            elif self.mode_selection == 'topk_gnn_merge':
+                with torch.no_grad():
+                    merge_weights = self._gnn_merge_weights(modes)
+                    self.last_merge_diagnostics = self._merge_diagnostics(
+                        merge_weights)
+                    return self._sample_merged_mode_actions(modes, merge_weights)
             else:
                 raise ValueError('Unknown mode_selection: {}'.format(self.mode_selection))
             selected = torch.argmax(refined_scores, dim=1)
@@ -350,7 +398,8 @@ class LOM(BaseAgent):
         policy_loss.backward()
         self.policy_opt.step()
         return {'policy/loss': policy_loss.item(),
-                'policy/weights': weights.mean().item()}
+                'policy/weights': weights.mean().item(),
+                **self.last_merge_diagnostics}
 
     def train_GMM(self, batch_size):
         states, actions, _, _, _ = self.replay_buffer.sample(batch_size)

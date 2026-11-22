@@ -41,6 +41,8 @@ class LomTopKTest(unittest.TestCase):
         agent.top_k = 3
         agent.mode_net = FixedModeNetwork([0.1, 0.8, -0.2, 0.4, 1.2])
         agent.gmm = FixedGMM(5, 2)
+        agent.gnn_temperature = 1.0
+        agent.gnn_prior_weight = 1.0
         return agent
 
     def test_topk_is_ranked_and_parameters_follow_indices(self):
@@ -73,6 +75,34 @@ class LomTopKTest(unittest.TestCase):
                 modes = agent.get_topk_modes(torch.randn(1, 4))
                 self.assertEqual(modes['indices'].tolist(), [expected])
                 self.assertEqual(modes['means'].shape, (1, k, 2))
+
+    def test_gnn_merge_weights_are_normalized(self):
+        agent = self.make_agent()
+
+        class FixedGNN(nn.Module):
+            def forward(self, node_features, means):
+                return node_features[..., -1]
+
+        agent.mode_gnn = FixedGNN()
+        modes = agent.get_topk_modes(torch.randn(2, 4))
+        weights = agent._gnn_merge_weights(modes)
+        self.assertEqual(weights.shape, (2, 3))
+        self.assertTrue(torch.allclose(
+            weights.sum(dim=1), torch.ones(2), atol=1e-6))
+        self.assertTrue(torch.isfinite(weights).all())
+
+    def test_gnn_merge_samples_from_components_without_mean_averaging(self):
+        agent = self.make_agent()
+        modes = agent.get_topk_modes(torch.randn(128, 4))
+        merge_weights = torch.zeros(128, 3)
+        merge_weights[:, 1] = 1.0
+        actions = agent._sample_merged_mode_actions(modes, merge_weights)
+        self.assertEqual(actions.shape, (128, 2))
+        self.assertTrue(torch.isfinite(actions).all())
+        self.assertTrue(torch.all(actions <= 1))
+        self.assertTrue(torch.all(actions >= -1))
+        self.assertTrue(torch.allclose(
+            actions.mean(dim=0), modes['means'][:, 1].mean(dim=0), atol=0.15))
 
 
 if __name__ == '__main__':

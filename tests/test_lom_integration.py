@@ -48,7 +48,7 @@ class LomIntegrationTest(unittest.TestCase):
         )
 
     def test_all_three_configurations_train_one_step(self):
-        for mode_selection in ('top1', 'topk_q', 'topk_gnn'):
+        for mode_selection in ('top1', 'topk_q', 'topk_gnn', 'topk_gnn_merge'):
             with self.subTest(mode_selection=mode_selection):
                 agent = self.make_agent(mode_selection)
                 info = agent.train_models()
@@ -57,7 +57,10 @@ class LomIntegrationTest(unittest.TestCase):
                 self.assertTrue(np.isfinite(action).all())
                 self.assertTrue(all(np.isfinite(value) for value in info.values()))
                 self.assertEqual('gnn/loss' in info,
-                                 mode_selection == 'topk_gnn')
+                                 mode_selection in ('topk_gnn', 'topk_gnn_merge'))
+                if mode_selection == 'topk_gnn_merge':
+                    self.assertTrue(np.isfinite(info['gnn/merge_entropy']))
+                    self.assertTrue(np.isfinite(info['gnn/effective_modes']))
 
 
 if __name__ == '__main__':
