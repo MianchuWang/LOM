@@ -1,0 +1,952 @@
+Logging to ./experiments/LOM-ICLR/topk_gnn_seed0/LOM_halfcheetah-medium-replay-v2_seed0/2026-11-21_9h48m11s
+This running starts with parameters:
+----------------------------------------
+- env_name: halfcheetah-medium-replay-v2
+- agent: LOM
+- buffer_capacity: 2000000
+- discount: 0.99
+- normalise: 1
+- seed: 0
+- render: 0
+- enable_wandb: 0
+- project: LOM-ICLR
+- group: topk_gnn_seed0
+- training_steps: 1000000
+- eval_episodes: 10
+- eval_every: 10000
+- log_path: ./experiments/
+- save_gmm: 1
+- gmm_pretrain_steps: 200000
+- gmm_batch_size: 512
+- gmm_checkpoint: gmm_halfcheetah-medium-replay-v2.pth
+- mode_selection: topk_gnn
+- top_k: 3
+- mode_action_samples: 8
+- gnn_hidden_dim: 128
+- gnn_lr: 0.0003
+- gnn_ranking_weight: 0.25
+----------------------------------------
+---------------------------------------
+| epoch time (min)         | 6.89     |
+| eval/normalized_score    | 4.31     |
+| eval/return              | 255      |
+| gnn/loss                 | 0.331    |
+| gnn/ranking_loss         | 0.526    |
+| gnn/regression_loss      | 0.2      |
+| mode_function/mode_loss  | 3.7      |
+| policy/loss              | 4.47     |
+| policy/weights           | 18.7     |
+| Q/loss                   | 6.61     |
+| Q/pred_value             | 63.9     |
+| Q/target_value           | 63.9     |
+| time/gnn_step_seconds    | 0.0112   |
+| time/mode_step_seconds   | 0.00529  |
+| time/policy_step_seconds | 0.0132   |
+| time/train_step_seconds  | 0.0347   |
+| time/value_step_seconds  | 0.00495  |
+| total steps              | 1e+04    |
+| training epoch           | 1        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.89     |
+| eval/normalized_score    | 23       |
+| eval/return              | 2.58e+03 |
+| gnn/loss                 | 0.324    |
+| gnn/ranking_loss         | 0.518    |
+| gnn/regression_loss      | 0.194    |
+| mode_function/mode_loss  | 8.2      |
+| policy/loss              | 4.81     |
+| policy/weights           | 18.9     |
+| Q/loss                   | 26.2     |
+| Q/pred_value             | 112      |
+| Q/target_value           | 113      |
+| time/gnn_step_seconds    | 0.00987  |
+| time/mode_step_seconds   | 0.00557  |
+| time/policy_step_seconds | 0.0113   |
+| time/train_step_seconds  | 0.033    |
+| time/value_step_seconds  | 0.00629  |
+| total steps              | 2e+04    |
+| training epoch           | 2        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.81     |
+| eval/normalized_score    | 38.3     |
+| eval/return              | 4.47e+03 |
+| gnn/loss                 | 0.349    |
+| gnn/ranking_loss         | 0.551    |
+| gnn/regression_loss      | 0.211    |
+| mode_function/mode_loss  | 19.5     |
+| policy/loss              | 4.8      |
+| policy/weights           | 19.2     |
+| Q/loss                   | 25.6     |
+| Q/pred_value             | 141      |
+| Q/target_value           | 141      |
+| time/gnn_step_seconds    | 0.00811  |
+| time/mode_step_seconds   | 0.00528  |
+| time/policy_step_seconds | 0.00522  |
+| time/train_step_seconds  | 0.0226   |
+| time/value_step_seconds  | 0.004    |
+| total steps              | 3e+04    |
+| training epoch           | 3        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.99     |
+| eval/normalized_score    | 46.5     |
+| eval/return              | 5.49e+03 |
+| gnn/loss                 | 0.353    |
+| gnn/ranking_loss         | 0.556    |
+| gnn/regression_loss      | 0.214    |
+| mode_function/mode_loss  | 21.2     |
+| policy/loss              | 3.83     |
+| policy/weights           | 15.5     |
+| Q/loss                   | 27.5     |
+| Q/pred_value             | 159      |
+| Q/target_value           | 158      |
+| time/gnn_step_seconds    | 0.00824  |
+| time/mode_step_seconds   | 0.00489  |
+| time/policy_step_seconds | 0.00629  |
+| time/train_step_seconds  | 0.0241   |
+| time/value_step_seconds  | 0.00469  |
+| total steps              | 4e+04    |
+| training epoch           | 4        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.7      |
+| eval/normalized_score    | 45.1     |
+| eval/return              | 5.32e+03 |
+| gnn/loss                 | 0.373    |
+| gnn/ranking_loss         | 0.569    |
+| gnn/regression_loss      | 0.231    |
+| mode_function/mode_loss  | 18.5     |
+| policy/loss              | 4.03     |
+| policy/weights           | 16.3     |
+| Q/loss                   | 67.3     |
+| Q/pred_value             | 186      |
+| Q/target_value           | 186      |
+| time/gnn_step_seconds    | 0.00809  |
+| time/mode_step_seconds   | 0.00574  |
+| time/policy_step_seconds | 0.00608  |
+| time/train_step_seconds  | 0.0238   |
+| time/value_step_seconds  | 0.00383  |
+| total steps              | 5e+04    |
+| training epoch           | 5        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.48     |
+| eval/normalized_score    | 47       |
+| eval/return              | 5.56e+03 |
+| gnn/loss                 | 0.377    |
+| gnn/ranking_loss         | 0.575    |
+| gnn/regression_loss      | 0.233    |
+| mode_function/mode_loss  | 25.4     |
+| policy/loss              | 4.02     |
+| policy/weights           | 17.7     |
+| Q/loss                   | 63.5     |
+| Q/pred_value             | 198      |
+| Q/target_value           | 197      |
+| time/gnn_step_seconds    | 0.0102   |
+| time/mode_step_seconds   | 0.00539  |
+| time/policy_step_seconds | 0.00889  |
+| time/train_step_seconds  | 0.03     |
+| time/value_step_seconds  | 0.0055   |
+| total steps              | 6e+04    |
+| training epoch           | 6        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.83     |
+| eval/normalized_score    | 46.8     |
+| eval/return              | 5.53e+03 |
+| gnn/loss                 | 0.364    |
+| gnn/ranking_loss         | 0.561    |
+| gnn/regression_loss      | 0.224    |
+| mode_function/mode_loss  | 28.6     |
+| policy/loss              | 3.09     |
+| policy/weights           | 15.3     |
+| Q/loss                   | 42       |
+| Q/pred_value             | 207      |
+| Q/target_value           | 208      |
+| time/gnn_step_seconds    | 0.00769  |
+| time/mode_step_seconds   | 0.00547  |
+| time/policy_step_seconds | 0.00797  |
+| time/train_step_seconds  | 0.0248   |
+| time/value_step_seconds  | 0.00365  |
+| total steps              | 7e+04    |
+| training epoch           | 7        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.94     |
+| eval/normalized_score    | 47.4     |
+| eval/return              | 5.61e+03 |
+| gnn/loss                 | 0.388    |
+| gnn/ranking_loss         | 0.576    |
+| gnn/regression_loss      | 0.244    |
+| mode_function/mode_loss  | 29.5     |
+| policy/loss              | 2.77     |
+| policy/weights           | 13.2     |
+| Q/loss                   | 51.2     |
+| Q/pred_value             | 210      |
+| Q/target_value           | 209      |
+| time/gnn_step_seconds    | 0.0125   |
+| time/mode_step_seconds   | 0.00497  |
+| time/policy_step_seconds | 0.00671  |
+| time/train_step_seconds  | 0.0278   |
+| time/value_step_seconds  | 0.00353  |
+| total steps              | 8e+04    |
+| training epoch           | 8        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.54     |
+| eval/normalized_score    | 47.3     |
+| eval/return              | 5.59e+03 |
+| gnn/loss                 | 0.38     |
+| gnn/ranking_loss         | 0.572    |
+| gnn/regression_loss      | 0.237    |
+| mode_function/mode_loss  | 30.7     |
+| policy/loss              | 4.15     |
+| policy/weights           | 17.8     |
+| Q/loss                   | 54.3     |
+| Q/pred_value             | 221      |
+| Q/target_value           | 222      |
+| time/gnn_step_seconds    | 0.00763  |
+| time/mode_step_seconds   | 0.00489  |
+| time/policy_step_seconds | 0.00773  |
+| time/train_step_seconds  | 0.0258   |
+| time/value_step_seconds  | 0.00554  |
+| total steps              | 9e+04    |
+| training epoch           | 9        |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.72     |
+| eval/normalized_score    | 47.9     |
+| eval/return              | 5.67e+03 |
+| gnn/loss                 | 0.361    |
+| gnn/ranking_loss         | 0.56     |
+| gnn/regression_loss      | 0.221    |
+| mode_function/mode_loss  | 44.4     |
+| policy/loss              | 4.7      |
+| policy/weights           | 16       |
+| Q/loss                   | 73.1     |
+| Q/pred_value             | 235      |
+| Q/target_value           | 234      |
+| time/gnn_step_seconds    | 0.00866  |
+| time/mode_step_seconds   | 0.00541  |
+| time/policy_step_seconds | 0.00664  |
+| time/train_step_seconds  | 0.0251   |
+| time/value_step_seconds  | 0.00433  |
+| total steps              | 1e+05    |
+| training epoch           | 10       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.49     |
+| eval/normalized_score    | 48.7     |
+| eval/return              | 5.77e+03 |
+| gnn/loss                 | 0.344    |
+| gnn/ranking_loss         | 0.549    |
+| gnn/regression_loss      | 0.207    |
+| mode_function/mode_loss  | 39.7     |
+| policy/loss              | 3.08     |
+| policy/weights           | 13.9     |
+| Q/loss                   | 65.1     |
+| Q/pred_value             | 226      |
+| Q/target_value           | 226      |
+| time/gnn_step_seconds    | 0.0163   |
+| time/mode_step_seconds   | 0.00531  |
+| time/policy_step_seconds | 0.00914  |
+| time/train_step_seconds  | 0.035    |
+| time/value_step_seconds  | 0.00427  |
+| total steps              | 1.1e+05  |
+| training epoch           | 11       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.46     |
+| eval/normalized_score    | 46.9     |
+| eval/return              | 5.54e+03 |
+| gnn/loss                 | 0.354    |
+| gnn/ranking_loss         | 0.551    |
+| gnn/regression_loss      | 0.216    |
+| mode_function/mode_loss  | 33.4     |
+| policy/loss              | 4.71     |
+| policy/weights           | 16.3     |
+| Q/loss                   | 45.1     |
+| Q/pred_value             | 238      |
+| Q/target_value           | 238      |
+| time/gnn_step_seconds    | 0.00753  |
+| time/mode_step_seconds   | 0.00465  |
+| time/policy_step_seconds | 0.00509  |
+| time/train_step_seconds  | 0.0209   |
+| time/value_step_seconds  | 0.00366  |
+| total steps              | 1.2e+05  |
+| training epoch           | 12       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.59     |
+| eval/normalized_score    | 48.1     |
+| eval/return              | 5.69e+03 |
+| gnn/loss                 | 0.364    |
+| gnn/ranking_loss         | 0.562    |
+| gnn/regression_loss      | 0.223    |
+| mode_function/mode_loss  | 41.4     |
+| policy/loss              | 3.97     |
+| policy/weights           | 13.8     |
+| Q/loss                   | 64.7     |
+| Q/pred_value             | 238      |
+| Q/target_value           | 238      |
+| time/gnn_step_seconds    | 0.0075   |
+| time/mode_step_seconds   | 0.00484  |
+| time/policy_step_seconds | 0.00845  |
+| time/train_step_seconds  | 0.0254   |
+| time/value_step_seconds  | 0.00459  |
+| total steps              | 1.3e+05  |
+| training epoch           | 13       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.73     |
+| eval/normalized_score    | 47.9     |
+| eval/return              | 5.67e+03 |
+| gnn/loss                 | 0.375    |
+| gnn/ranking_loss         | 0.567    |
+| gnn/regression_loss      | 0.234    |
+| mode_function/mode_loss  | 39.8     |
+| policy/loss              | 4.93     |
+| policy/weights           | 15.9     |
+| Q/loss                   | 50.2     |
+| Q/pred_value             | 236      |
+| Q/target_value           | 236      |
+| time/gnn_step_seconds    | 0.00912  |
+| time/mode_step_seconds   | 0.00533  |
+| time/policy_step_seconds | 0.014    |
+| time/train_step_seconds  | 0.0321   |
+| time/value_step_seconds  | 0.00373  |
+| total steps              | 1.4e+05  |
+| training epoch           | 14       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.54     |
+| eval/normalized_score    | 50.2     |
+| eval/return              | 5.95e+03 |
+| gnn/loss                 | 0.367    |
+| gnn/ranking_loss         | 0.565    |
+| gnn/regression_loss      | 0.226    |
+| mode_function/mode_loss  | 35.9     |
+| policy/loss              | 3.58     |
+| policy/weights           | 14.9     |
+| Q/loss                   | 37.4     |
+| Q/pred_value             | 229      |
+| Q/target_value           | 228      |
+| time/gnn_step_seconds    | 0.00777  |
+| time/mode_step_seconds   | 0.00573  |
+| time/policy_step_seconds | 0.00511  |
+| time/train_step_seconds  | 0.0219   |
+| time/value_step_seconds  | 0.00325  |
+| total steps              | 1.5e+05  |
+| training epoch           | 15       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.41     |
+| eval/normalized_score    | 46.6     |
+| eval/return              | 5.5e+03  |
+| gnn/loss                 | 0.366    |
+| gnn/ranking_loss         | 0.565    |
+| gnn/regression_loss      | 0.225    |
+| mode_function/mode_loss  | 53       |
+| policy/loss              | 5.48     |
+| policy/weights           | 17.5     |
+| Q/loss                   | 49.6     |
+| Q/pred_value             | 246      |
+| Q/target_value           | 245      |
+| time/gnn_step_seconds    | 0.00877  |
+| time/mode_step_seconds   | 0.00542  |
+| time/policy_step_seconds | 0.00564  |
+| time/train_step_seconds  | 0.0236   |
+| time/value_step_seconds  | 0.00381  |
+| total steps              | 1.6e+05  |
+| training epoch           | 16       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 71.5     |
+| eval/normalized_score    | 49.4     |
+| eval/return              | 5.86e+03 |
+| gnn/loss                 | 0.352    |
+| gnn/ranking_loss         | 0.552    |
+| gnn/regression_loss      | 0.214    |
+| mode_function/mode_loss  | 43.4     |
+| policy/loss              | 4.41     |
+| policy/weights           | 15.1     |
+| Q/loss                   | 60.4     |
+| Q/pred_value             | 242      |
+| Q/target_value           | 241      |
+| time/gnn_step_seconds    | 0.0103   |
+| time/mode_step_seconds   | 0.00867  |
+| time/policy_step_seconds | 0.0084   |
+| time/train_step_seconds  | 0.0306   |
+| time/value_step_seconds  | 0.00319  |
+| total steps              | 1.7e+05  |
+| training epoch           | 17       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 6.99     |
+| eval/normalized_score    | 47.9     |
+| eval/return              | 5.67e+03 |
+| gnn/loss                 | 0.357    |
+| gnn/ranking_loss         | 0.558    |
+| gnn/regression_loss      | 0.218    |
+| mode_function/mode_loss  | 40.7     |
+| policy/loss              | 3.47     |
+| policy/weights           | 15.2     |
+| Q/loss                   | 49.8     |
+| Q/pred_value             | 249      |
+| Q/target_value           | 248      |
+| time/gnn_step_seconds    | 0.0158   |
+| time/mode_step_seconds   | 0.00578  |
+| time/policy_step_seconds | 0.0104   |
+| time/train_step_seconds  | 0.0365   |
+| time/value_step_seconds  | 0.00451  |
+| total steps              | 1.8e+05  |
+| training epoch           | 18       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 6        |
+| eval/normalized_score    | 48.8     |
+| eval/return              | 5.78e+03 |
+| gnn/loss                 | 0.331    |
+| gnn/ranking_loss         | 0.533    |
+| gnn/regression_loss      | 0.198    |
+| mode_function/mode_loss  | 51.5     |
+| policy/loss              | 3.38     |
+| policy/weights           | 15.4     |
+| Q/loss                   | 61.7     |
+| Q/pred_value             | 242      |
+| Q/target_value           | 242      |
+| time/gnn_step_seconds    | 0.009    |
+| time/mode_step_seconds   | 0.00555  |
+| time/policy_step_seconds | 0.0111   |
+| time/train_step_seconds  | 0.03     |
+| time/value_step_seconds  | 0.00429  |
+| total steps              | 1.9e+05  |
+| training epoch           | 19       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.22     |
+| eval/normalized_score    | 48.8     |
+| eval/return              | 5.78e+03 |
+| gnn/loss                 | 0.371    |
+| gnn/ranking_loss         | 0.572    |
+| gnn/regression_loss      | 0.228    |
+| mode_function/mode_loss  | 42.1     |
+| policy/loss              | 4.07     |
+| policy/weights           | 16.8     |
+| Q/loss                   | 106      |
+| Q/pred_value             | 244      |
+| Q/target_value           | 245      |
+| time/gnn_step_seconds    | 0.00918  |
+| time/mode_step_seconds   | 0.00604  |
+| time/policy_step_seconds | 0.00738  |
+| time/train_step_seconds  | 0.0258   |
+| time/value_step_seconds  | 0.00323  |
+| total steps              | 2e+05    |
+| training epoch           | 20       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.48     |
+| eval/normalized_score    | 48       |
+| eval/return              | 5.68e+03 |
+| gnn/loss                 | 0.389    |
+| gnn/ranking_loss         | 0.584    |
+| gnn/regression_loss      | 0.243    |
+| mode_function/mode_loss  | 56.7     |
+| policy/loss              | 3.84     |
+| policy/weights           | 16.7     |
+| Q/loss                   | 58.3     |
+| Q/pred_value             | 247      |
+| Q/target_value           | 248      |
+| time/gnn_step_seconds    | 0.00934  |
+| time/mode_step_seconds   | 0.00558  |
+| time/policy_step_seconds | 0.00661  |
+| time/train_step_seconds  | 0.0253   |
+| time/value_step_seconds  | 0.00371  |
+| total steps              | 2.1e+05  |
+| training epoch           | 21       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 6.24     |
+| eval/normalized_score    | 48.9     |
+| eval/return              | 5.79e+03 |
+| gnn/loss                 | 0.332    |
+| gnn/ranking_loss         | 0.532    |
+| gnn/regression_loss      | 0.2      |
+| mode_function/mode_loss  | 51.2     |
+| policy/loss              | 3.18     |
+| policy/weights           | 16.1     |
+| Q/loss                   | 75.1     |
+| Q/pred_value             | 247      |
+| Q/target_value           | 246      |
+| time/gnn_step_seconds    | 0.0101   |
+| time/mode_step_seconds   | 0.00543  |
+| time/policy_step_seconds | 0.0114   |
+| time/train_step_seconds  | 0.0325   |
+| time/value_step_seconds  | 0.00555  |
+| total steps              | 2.2e+05  |
+| training epoch           | 22       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 6.65     |
+| eval/normalized_score    | 48.7     |
+| eval/return              | 5.77e+03 |
+| gnn/loss                 | 0.341    |
+| gnn/ranking_loss         | 0.539    |
+| gnn/regression_loss      | 0.206    |
+| mode_function/mode_loss  | 50.6     |
+| policy/loss              | 2.48     |
+| policy/weights           | 11.7     |
+| Q/loss                   | 67.7     |
+| Q/pred_value             | 259      |
+| Q/target_value           | 258      |
+| time/gnn_step_seconds    | 0.0159   |
+| time/mode_step_seconds   | 0.00899  |
+| time/policy_step_seconds | 0.00778  |
+| time/train_step_seconds  | 0.0391   |
+| time/value_step_seconds  | 0.00644  |
+| total steps              | 2.3e+05  |
+| training epoch           | 23       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.18     |
+| eval/normalized_score    | 48.4     |
+| eval/return              | 5.73e+03 |
+| gnn/loss                 | 0.364    |
+| gnn/ranking_loss         | 0.559    |
+| gnn/regression_loss      | 0.224    |
+| mode_function/mode_loss  | 49       |
+| policy/loss              | 2.94     |
+| policy/weights           | 15.6     |
+| Q/loss                   | 55.4     |
+| Q/pred_value             | 254      |
+| Q/target_value           | 254      |
+| time/gnn_step_seconds    | 0.00899  |
+| time/mode_step_seconds   | 0.00624  |
+| time/policy_step_seconds | 0.00921  |
+| time/train_step_seconds  | 0.0299   |
+| time/value_step_seconds  | 0.00543  |
+| total steps              | 2.4e+05  |
+| training epoch           | 24       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.35     |
+| eval/normalized_score    | 48.8     |
+| eval/return              | 5.78e+03 |
+| gnn/loss                 | 0.352    |
+| gnn/ranking_loss         | 0.552    |
+| gnn/regression_loss      | 0.214    |
+| mode_function/mode_loss  | 65.5     |
+| policy/loss              | 3.29     |
+| policy/weights           | 15.7     |
+| Q/loss                   | 48.2     |
+| Q/pred_value             | 247      |
+| Q/target_value           | 248      |
+| time/gnn_step_seconds    | 0.00737  |
+| time/mode_step_seconds   | 0.00515  |
+| time/policy_step_seconds | 0.00726  |
+| time/train_step_seconds  | 0.0239   |
+| time/value_step_seconds  | 0.00414  |
+| total steps              | 2.5e+05  |
+| training epoch           | 25       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.83     |
+| eval/normalized_score    | 49.9     |
+| eval/return              | 5.92e+03 |
+| gnn/loss                 | 0.365    |
+| gnn/ranking_loss         | 0.564    |
+| gnn/regression_loss      | 0.224    |
+| mode_function/mode_loss  | 51.1     |
+| policy/loss              | 2.78     |
+| policy/weights           | 14.7     |
+| Q/loss                   | 41.9     |
+| Q/pred_value             | 234      |
+| Q/target_value           | 234      |
+| time/gnn_step_seconds    | 0.012    |
+| time/mode_step_seconds   | 0.00698  |
+| time/policy_step_seconds | 0.00798  |
+| time/train_step_seconds  | 0.0315   |
+| time/value_step_seconds  | 0.00458  |
+| total steps              | 2.6e+05  |
+| training epoch           | 26       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.78     |
+| eval/normalized_score    | 49.8     |
+| eval/return              | 5.91e+03 |
+| gnn/loss                 | 0.346    |
+| gnn/ranking_loss         | 0.546    |
+| gnn/regression_loss      | 0.21     |
+| mode_function/mode_loss  | 50.8     |
+| policy/loss              | 3.15     |
+| policy/weights           | 12.6     |
+| Q/loss                   | 61.4     |
+| Q/pred_value             | 251      |
+| Q/target_value           | 250      |
+| time/gnn_step_seconds    | 0.0125   |
+| time/mode_step_seconds   | 0.00561  |
+| time/policy_step_seconds | 0.00957  |
+| time/train_step_seconds  | 0.0341   |
+| time/value_step_seconds  | 0.00643  |
+| total steps              | 2.7e+05  |
+| training epoch           | 27       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.75     |
+| eval/normalized_score    | 49.6     |
+| eval/return              | 5.88e+03 |
+| gnn/loss                 | 0.366    |
+| gnn/ranking_loss         | 0.564    |
+| gnn/regression_loss      | 0.225    |
+| mode_function/mode_loss  | 48.3     |
+| policy/loss              | 3.64     |
+| policy/weights           | 12.9     |
+| Q/loss                   | 74.8     |
+| Q/pred_value             | 256      |
+| Q/target_value           | 257      |
+| time/gnn_step_seconds    | 0.00814  |
+| time/mode_step_seconds   | 0.00515  |
+| time/policy_step_seconds | 0.00752  |
+| time/train_step_seconds  | 0.0254   |
+| time/value_step_seconds  | 0.00452  |
+| total steps              | 2.8e+05  |
+| training epoch           | 28       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.91     |
+| eval/normalized_score    | 49       |
+| eval/return              | 5.81e+03 |
+| gnn/loss                 | 0.342    |
+| gnn/ranking_loss         | 0.542    |
+| gnn/regression_loss      | 0.207    |
+| mode_function/mode_loss  | 39.6     |
+| policy/loss              | 4.18     |
+| policy/weights           | 15.6     |
+| Q/loss                   | 39.2     |
+| Q/pred_value             | 249      |
+| Q/target_value           | 249      |
+| time/gnn_step_seconds    | 0.00767  |
+| time/mode_step_seconds   | 0.00534  |
+| time/policy_step_seconds | 0.00575  |
+| time/train_step_seconds  | 0.0217   |
+| time/value_step_seconds  | 0.0029   |
+| total steps              | 2.9e+05  |
+| training epoch           | 29       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.81     |
+| eval/normalized_score    | 50       |
+| eval/return              | 5.93e+03 |
+| gnn/loss                 | 0.327    |
+| gnn/ranking_loss         | 0.53     |
+| gnn/regression_loss      | 0.195    |
+| mode_function/mode_loss  | 40.5     |
+| policy/loss              | 3.6      |
+| policy/weights           | 17.4     |
+| Q/loss                   | 67.6     |
+| Q/pred_value             | 242      |
+| Q/target_value           | 243      |
+| time/gnn_step_seconds    | 0.00798  |
+| time/mode_step_seconds   | 0.00517  |
+| time/policy_step_seconds | 0.00682  |
+| time/train_step_seconds  | 0.0234   |
+| time/value_step_seconds  | 0.00342  |
+| total steps              | 3e+05    |
+| training epoch           | 30       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.9      |
+| eval/normalized_score    | 48.9     |
+| eval/return              | 5.8e+03  |
+| gnn/loss                 | 0.318    |
+| gnn/ranking_loss         | 0.518    |
+| gnn/regression_loss      | 0.188    |
+| mode_function/mode_loss  | 53.6     |
+| policy/loss              | 5.01     |
+| policy/weights           | 18.6     |
+| Q/loss                   | 66.1     |
+| Q/pred_value             | 254      |
+| Q/target_value           | 254      |
+| time/gnn_step_seconds    | 0.0132   |
+| time/mode_step_seconds   | 0.00523  |
+| time/policy_step_seconds | 0.00728  |
+| time/train_step_seconds  | 0.0309   |
+| time/value_step_seconds  | 0.00511  |
+| total steps              | 3.1e+05  |
+| training epoch           | 31       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.87     |
+| eval/normalized_score    | 49.9     |
+| eval/return              | 5.92e+03 |
+| gnn/loss                 | 0.332    |
+| gnn/ranking_loss         | 0.531    |
+| gnn/regression_loss      | 0.199    |
+| mode_function/mode_loss  | 44.8     |
+| policy/loss              | 3.55     |
+| policy/weights           | 16       |
+| Q/loss                   | 62.3     |
+| Q/pred_value             | 255      |
+| Q/target_value           | 256      |
+| time/gnn_step_seconds    | 0.0122   |
+| time/mode_step_seconds   | 0.00526  |
+| time/policy_step_seconds | 0.0067   |
+| time/train_step_seconds  | 0.0274   |
+| time/value_step_seconds  | 0.00321  |
+| total steps              | 3.2e+05  |
+| training epoch           | 32       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.84     |
+| eval/normalized_score    | 48.6     |
+| eval/return              | 5.75e+03 |
+| gnn/loss                 | 0.351    |
+| gnn/ranking_loss         | 0.547    |
+| gnn/regression_loss      | 0.214    |
+| mode_function/mode_loss  | 50.9     |
+| policy/loss              | 3.26     |
+| policy/weights           | 15.3     |
+| Q/loss                   | 54.6     |
+| Q/pred_value             | 241      |
+| Q/target_value           | 241      |
+| time/gnn_step_seconds    | 0.00906  |
+| time/mode_step_seconds   | 0.0055   |
+| time/policy_step_seconds | 0.00932  |
+| time/train_step_seconds  | 0.0278   |
+| time/value_step_seconds  | 0.00387  |
+| total steps              | 3.3e+05  |
+| training epoch           | 33       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.09     |
+| eval/normalized_score    | 49       |
+| eval/return              | 5.81e+03 |
+| gnn/loss                 | 0.344    |
+| gnn/ranking_loss         | 0.543    |
+| gnn/regression_loss      | 0.208    |
+| mode_function/mode_loss  | 42.8     |
+| policy/loss              | 2.47     |
+| policy/weights           | 12.3     |
+| Q/loss                   | 59.6     |
+| Q/pred_value             | 238      |
+| Q/target_value           | 238      |
+| time/gnn_step_seconds    | 0.00731  |
+| time/mode_step_seconds   | 0.00514  |
+| time/policy_step_seconds | 0.00525  |
+| time/train_step_seconds  | 0.0211   |
+| time/value_step_seconds  | 0.00344  |
+| total steps              | 3.4e+05  |
+| training epoch           | 34       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.97     |
+| eval/normalized_score    | 49.4     |
+| eval/return              | 5.86e+03 |
+| gnn/loss                 | 0.372    |
+| gnn/ranking_loss         | 0.569    |
+| gnn/regression_loss      | 0.23     |
+| mode_function/mode_loss  | 40.2     |
+| policy/loss              | 2.98     |
+| policy/weights           | 14       |
+| Q/loss                   | 59.3     |
+| Q/pred_value             | 234      |
+| Q/target_value           | 234      |
+| time/gnn_step_seconds    | 0.00896  |
+| time/mode_step_seconds   | 0.00514  |
+| time/policy_step_seconds | 0.00607  |
+| time/train_step_seconds  | 0.0237   |
+| time/value_step_seconds  | 0.00353  |
+| total steps              | 3.5e+05  |
+| training epoch           | 35       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.83     |
+| eval/normalized_score    | 49.6     |
+| eval/return              | 5.88e+03 |
+| gnn/loss                 | 0.35     |
+| gnn/ranking_loss         | 0.547    |
+| gnn/regression_loss      | 0.213    |
+| mode_function/mode_loss  | 44.6     |
+| policy/loss              | 3.6      |
+| policy/weights           | 15.2     |
+| Q/loss                   | 45       |
+| Q/pred_value             | 246      |
+| Q/target_value           | 245      |
+| time/gnn_step_seconds    | 0.0074   |
+| time/mode_step_seconds   | 0.00556  |
+| time/policy_step_seconds | 0.00591  |
+| time/train_step_seconds  | 0.0235   |
+| time/value_step_seconds  | 0.00457  |
+| total steps              | 3.6e+05  |
+| training epoch           | 36       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.8      |
+| eval/normalized_score    | 49.6     |
+| eval/return              | 5.88e+03 |
+| gnn/loss                 | 0.326    |
+| gnn/ranking_loss         | 0.53     |
+| gnn/regression_loss      | 0.194    |
+| mode_function/mode_loss  | 48       |
+| policy/loss              | 3.75     |
+| policy/weights           | 17.2     |
+| Q/loss                   | 54.4     |
+| Q/pred_value             | 259      |
+| Q/target_value           | 259      |
+| time/gnn_step_seconds    | 0.00851  |
+| time/mode_step_seconds   | 0.00508  |
+| time/policy_step_seconds | 0.00813  |
+| time/train_step_seconds  | 0.0277   |
+| time/value_step_seconds  | 0.00595  |
+| total steps              | 3.7e+05  |
+| training epoch           | 37       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.82     |
+| eval/normalized_score    | 49       |
+| eval/return              | 5.8e+03  |
+| gnn/loss                 | 0.346    |
+| gnn/ranking_loss         | 0.542    |
+| gnn/regression_loss      | 0.211    |
+| mode_function/mode_loss  | 45.6     |
+| policy/loss              | 3.27     |
+| policy/weights           | 13.2     |
+| Q/loss                   | 127      |
+| Q/pred_value             | 229      |
+| Q/target_value           | 229      |
+| time/gnn_step_seconds    | 0.00832  |
+| time/mode_step_seconds   | 0.00555  |
+| time/policy_step_seconds | 0.00686  |
+| time/train_step_seconds  | 0.0257   |
+| time/value_step_seconds  | 0.00496  |
+| total steps              | 3.8e+05  |
+| training epoch           | 38       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.82     |
+| eval/normalized_score    | 49.7     |
+| eval/return              | 5.9e+03  |
+| gnn/loss                 | 0.361    |
+| gnn/ranking_loss         | 0.558    |
+| gnn/regression_loss      | 0.221    |
+| mode_function/mode_loss  | 68.6     |
+| policy/loss              | 4.1      |
+| policy/weights           | 17.8     |
+| Q/loss                   | 59.8     |
+| Q/pred_value             | 255      |
+| Q/target_value           | 255      |
+| time/gnn_step_seconds    | 0.00977  |
+| time/mode_step_seconds   | 0.00636  |
+| time/policy_step_seconds | 0.00706  |
+| time/train_step_seconds  | 0.0275   |
+| time/value_step_seconds  | 0.0043   |
+| total steps              | 3.9e+05  |
+| training epoch           | 39       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.11     |
+| eval/normalized_score    | 49.5     |
+| eval/return              | 5.87e+03 |
+| gnn/loss                 | 0.346    |
+| gnn/ranking_loss         | 0.54     |
+| gnn/regression_loss      | 0.211    |
+| mode_function/mode_loss  | 42.3     |
+| policy/loss              | 3.62     |
+| policy/weights           | 14.9     |
+| Q/loss                   | 39.4     |
+| Q/pred_value             | 250      |
+| Q/target_value           | 250      |
+| time/gnn_step_seconds    | 0.0146   |
+| time/mode_step_seconds   | 0.00596  |
+| time/policy_step_seconds | 0.00611  |
+| time/train_step_seconds  | 0.0305   |
+| time/value_step_seconds  | 0.0039   |
+| total steps              | 4e+05    |
+| training epoch           | 40       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.72     |
+| eval/normalized_score    | 48.6     |
+| eval/return              | 5.75e+03 |
+| gnn/loss                 | 0.356    |
+| gnn/ranking_loss         | 0.56     |
+| gnn/regression_loss      | 0.216    |
+| mode_function/mode_loss  | 46.4     |
+| policy/loss              | 2.7      |
+| policy/weights           | 13.5     |
+| Q/loss                   | 60.4     |
+| Q/pred_value             | 256      |
+| Q/target_value           | 256      |
+| time/gnn_step_seconds    | 0.0139   |
+| time/mode_step_seconds   | 0.00578  |
+| time/policy_step_seconds | 0.00696  |
+| time/train_step_seconds  | 0.0312   |
+| time/value_step_seconds  | 0.00458  |
+| total steps              | 4.1e+05  |
+| training epoch           | 41       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 5.39     |
+| eval/normalized_score    | 49.1     |
+| eval/return              | 5.81e+03 |
+| gnn/   |loss                 | 0.363 
+| gnn/ranking_loss         | 0.558    |
+| gnn/regression_loss      | 0.224    |
+| mode_function/mode_loss  | 47.1     |
+| policy/loss              | 3.7      |
+| policy/weights           | 14.2     |
+| Q/loss                   | 50.1     |
+| Q/pred_value             | 255      |
+| Q/target_value           | 254      |
+| time/gnn_step_seconds    | 0.00845  |
+| time/mode_step_seconds   | 0.00502  |
+| time/policy_step_seconds | 0.00579  |
+| time/train_step_seconds  | 0.024    |
+| time/value_step_seconds  | 0.0047   |
+| total steps              | 4.2e+05  |
+| training epoch           | 42       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.84     |
+| eval/normalized_score    | 49.5     |
+| eval/return              | 5.86e+03 |
+| gnn/loss                 | 0.381    |
+| gnn/ranking_loss         | 0.574    |
+| gnn/regression_loss      | 0.237    |
+| mode_function/mode_loss  | 49.1     |
+| policy/loss              | 3.98     |
+| policy/weights           | 16.9     |
+| Q/loss                   | 73.3     |
+| Q/pred_value             | 264      |
+| Q/target_value           | 263      |
+| time/gnn_step_seconds    | 0.0122   |
+| time/mode_step_seconds   | 0.00595  |
+| time/policy_step_seconds | 0.00798  |
+| time/train_step_seconds  | 0.0304   |
+| time/value_step_seconds  | 0.00424  |
+| total steps              | 4.3e+05  |
+| training epoch           | 43       |
+---------------------------------------
+---------------------------------------
+| epoch time (min)         | 4.71     |
+| eval/normalized_score    | 49.4     |
+| eval/return              | 5.86e+03 |
+| gnn/loss                 | 0.348    |
+| gnn/ranking_loss         | 0.545    |
+| gnn/regression_loss      | 0.212    |
+| mode_function/mode_loss  | 59.1     |
+| policy/loss              | 3.47     |
+| policy/weights           | 14.6     |
+| Q/loss                   | 51.8     |
+| Q/pred_value             | 241      |
+| Q/target_value           | 241      |
+| time/gnn_step_seconds    | 0.0118   |
+| time/mode_step_seconds   | 0.00462  |
+| time/policy_step_seconds | 0.00621  |
+| time/train_step_seconds  | 0.0264   |
+| time/value_step_seconds  | 0.00376  |
+| total steps              | 4.4e+05  |
+| training epoch           | 44       |
+---------------------------------------
